@@ -1,0 +1,50 @@
+# Schema for My Module configuration, from "Config API in Drupal 8", chapter 2.
+
+mymodule.settings:
+  type: mapping
+  label: 'My module settings'
+  mapping:
+    submit_button_label:
+      type: label
+      label: 'Label for submit button'
+    name_field_settings:
+      type: mapping
+      label: 'Settings for name field'
+      mapping:
+        field_label:
+          type: label
+          label: 'Label for name field'
+        field_size:
+          type: integer
+          label: 'Size of name field'
+
+# Schema for entity bundles of My Entity entites, from "Defining a Configuration
+# Entity Type in Drupal 8", chapter 4.
+
+mymodule.myentity_type.*:
+  type: config_entity
+  label: 'My entity subtype'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readable name'
+    label:
+      type: label
+      label: 'Name'
+    description:
+      type: text
+      label: 'Description'
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        myentity:
+          type: mymodule.settings.myentity
+
+mymodule.settings.myentity:
+  type: mapping
+  label: 'My entity subtype settings'
+  mapping:
+    default_status:
+      type: boolean
+      label: 'Published by default'

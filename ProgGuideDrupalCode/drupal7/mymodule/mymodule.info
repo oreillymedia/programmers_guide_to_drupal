@@ -1,0 +1,21 @@
+; Drupal 7 sample module .info file
+
+; Comments start with ;
+
+; The name displayed on the Modules list page.
+name = My Module
+
+; The longer description displayed on the Modules list.
+description = Sample module from Programmers Guide to Drupal
+
+; The Drupal core version this module is compatible with.
+core = 7.x
+
+; Dependencies on other modules.
+dependencies[] = node
+dependencies[] = entity
+
+; Files that Drupal needs to be notified of.
+files[] = mymodule-hookname.tpl.php
+files[] = tests/mymodule.test
+

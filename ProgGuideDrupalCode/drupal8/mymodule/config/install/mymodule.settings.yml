@@ -1,0 +1,6 @@
+# Default configuration for My Module, from "Config API in Drupal 8", chapter 2.
+
+submit_button_label: 'Submit'
+name_field_settings:
+  field_label: 'Your name'
+  field_size: 50

@@ -1,0 +1,648 @@
+<?php
+
+/**
+ * @file
+ * Tests for the sample module and book code for Drupal 7.
+ */
+
+/**
+ * Base class for all book code tests, with helper methods.
+ */
+class ProgrammersGuideTestBase extends DrupalWebTestCase {
+
+  /**
+   * Verbose output of a PHP variable with optional label.
+   */
+  public function outputVariable($var, $label = '') {
+    $this->verbose(
+      (($label) ? '<h2>' . $label . '</h2>' : '') .
+      '<pre>' . print_r($var, TRUE), '</pre>');
+  }
+
+  /**
+   * Verbose output of HTML code with optional label.
+   */
+  public function outputHTML($var, $label = '') {
+    $this->verbose(
+      (($label) ? '<h2>' . $label . '</h2>' : '') .
+      htmlentities($var));
+  }
+
+  /**
+   * Assert that the page title contains a string.
+   *
+   * Function borrowed from https://drupal.org/project/api.
+   */
+  protected function assertTitleContains($string, $message) {
+    $title = current($this->xpath('//title'));
+    $this->assertTrue(strpos($title, $string) !== FALSE, $message);
+  }
+
+  /**
+   * Places an existing block in a region of a  theme.
+   *
+   * You need to have the block module enabled, and be logged in as a user
+   * who has 'administer blocks' permission.
+   *
+   * @param string $title
+   *   Title to give the block.
+   * @param string $path
+   *   Module/delta for the block, such as 'system/powered-by'.
+   * @param string $theme
+   *   Machine name of theme to use.
+   * @param string $region
+   *   Region to put the block in.
+   */
+  public function placeBlock($title, $path, $theme, $region) {
+    $this->drupalPost('admin/structure/block/manage/' . $path . '/configure',
+      array(
+        'regions[' . $theme . ']' => $region,
+        'title' => $title,
+      ),
+      t('Save block'));
+  }
+}
+
+/**
+ * Tests various code snippets from the book.
+ */
+class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Book snippets',
+      'description' => 'Tests various code snippets from the book.',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    // Enable the book's module.
+    parent::setUp('mymodule');
+  }
+
+  /**
+   * Tests various code snippets.
+   */
+  function testSnippets() {
+    // Theme snippets from section "Making Your Output Themeable" in Chapter 2.
+
+    $build['hello'] = array(
+      '#input1' => t('Hello World!'),
+      '#theme' => 'mymodule_hookname',
+    );
+    $output = drupal_render($build);
+    $expected = '<div>Hello World!</div>';
+    $this->outputHTML($output, 'Theme template output');
+    $this->assertEqual(trim($output), $expected, 'Theme template worked in render array');
+
+    $data = array('input1' => t('Hello World!'));
+    $output = theme('mymodule_hookname_2', $data);
+    $this->outputHTML($output, 'Theme function output');
+    $this->assertEqual(trim($output), $expected, 'Theme function worked in direct theme() call');
+
+    // Snippets from "Internationalizing User Interface Text" section in
+    // chapter 2. Good code only; bad code examples are omitted.
+
+    $button_text = t('Save');
+    $this->assertEqual($button_text, 'Save', 't() worked OK on simple string');
+
+    $user_name = 'foo';
+    $message_string = t('Hello @user_name', array('@user_name' => $user_name));
+    $this->outputHTML($message_string, 't() with variables output');
+    $this->assertEqual($message_string, 'Hello foo', 't() worked OK on string with variable');
+
+    // Database snippets from "Querying the Database with the Database API"
+    // section in Chapter 2.
+
+    // Make a user for querying purposes.
+    $account = $this->drupalCreateUser();
+
+    // Query by status 1 (active).
+    $desired_status = 1;
+    $found = FALSE;
+    $result = db_query('SELECT * FROM {users} u WHERE u.status = :status',
+      array(':status' => $desired_status));
+    foreach ($result as $record) {
+      $this->outputVariable($record, 'User database record');
+      if ($record->uid == $account->uid) {
+        $found = TRUE;
+      }
+    }
+    $this->assertTrue($found, 'Created user was found by status query');
+
+    // Create a node, for query purposes.
+    $newnode = $this->drupalCreateNode();
+    // Log in as user who can access content.
+    $account = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($account);
+
+    $result = db_select('node', 'n')
+      ->addTag('node_access') // Enforce node access permissions.
+      ->fields('n', array('title', 'nid', 'created')) // Fields to return.
+      ->condition('n.status', 1) // WHERE condition.
+      ->execute();
+    $found = FALSE;
+    foreach ($result as $node) {
+      $title = $node->title;
+      if ($node->nid == $newnode->nid) {
+        $found = TRUE;
+        $this->verbose("Found node with title $title");
+      }
+    }
+    $this->assertTrue($found, "Found node in dynamic query");
+
+    $query = db_select('node', 'n');
+    $query->addField('n', 'changed', 'last_updated');
+    $query->innerJoin('users', 'u', 'u.uid = n.uid');
+    $query = $query->extend('PagerDefault');
+    $result = $query
+      ->fields('n', array('title', 'nid'))
+      ->fields('u', array('name'))
+      ->addTag('node_access')
+      ->condition('n.status', 1)
+      ->limit(20)
+      ->execute();
+
+    $found = FALSE;
+    foreach ($result as $node) {
+      $title = $node->title;
+      if ($node->nid == $newnode->nid) {
+        $found = TRUE;
+      }
+    }
+    $this->assertTrue($found, "Found node in pager query");
+
+    // Snippets from the "Cleansing and Checking User-Provided Input"
+    // section in Chapter 2. Only "good" code is included.
+
+    $text = '<h2>Text with HTML</h2>';
+    $plain_text = htmlentities($text);
+    $url = 'http://example.com';
+
+    $output = check_plain($text);
+    $this->outputHTML($output, 'check_plain output');
+    $this->assertEqual($output, $plain_text, 'check_plain output is as expected');
+
+    $output = l($text, $url);
+    $this->outputHTML($output, 'l() output');
+    $this->assertEqual($output, '<a href="' . $url . '">' . $plain_text . '</a>', 'l output is as expected');
+
+
+  }
+}
+
+/**
+ * Tests install hooks.
+ *
+ * @see mymodule_enable()
+ */
+class MyModuleEnableTest extends ProgrammersGuideTestBase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Install hooks',
+      'description' => 'Tests the install hooks and other basic hooks',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    // Enable the book's module and Taxonomy.
+    parent::setUp('mymodule', 'taxonomy');
+  }
+
+  /**
+   * Tests the enable hook.
+   *
+   * @see mymodule_enable()
+   */
+  function testEnableHook() {
+    // The function mymodule_enable() sets up a taxonomy vocabulary when the
+    // module is enabled.
+    cache_clear_all();
+
+    $vid = variable_get('mymodule_vocabulary', 0);
+    $this->assertFalse($vid == 0, 'Vocabulary ID was saved during module enable');
+    $vocabulary = taxonomy_vocabulary_load($vid);
+    $this->outputVariable($vocabulary, 'Loaded vocabulary object');
+    $this->assertEqual($vocabulary->name, 'Some appropriate name', 'Vocabulary with correct name was loaded');
+
+    // Log in as a user who can access the Taxonomy page and check if it
+    // is there.
+    $account = $this->drupalCreateUser(array('administer taxonomy'));
+    $this->drupalLogin($account);
+    $this->drupalGet('admin/structure/taxonomy');
+    $this->assertText('Some appropriate name', 'Vocabulary name appears on the taxonomy page');
+  }
+
+  /**
+   * Tests the schema hook.
+   *
+   * @see mymodule_schema()
+   */
+  function testSchemaHook() {
+    // Add some data to the table, and then retrieve it, to verify that
+    // the table was created.
+    db_insert('mymodule_foo')
+      ->fields(array('bar' => 'Hello', 'baz' => 2))
+      ->execute();
+    $result = db_query('SELECT * from {mymodule_foo}');
+    $count = 0;
+    foreach ($result as $record) {
+      $count++;
+      $this->outputVariable($record, 'Database record');
+      $this->assertEqual($record->bar, 'Hello', 'Field bar is correct');
+      $this->assertEqual($record->baz, 2, 'Field baz is correct');
+    }
+    $this->assertEqual($count, 1, 'Count of records is correct');
+  }
+
+  /**
+   * Tests the permission hook.
+   *
+   * @see mymodule_permission()
+   */
+  function testPermission() {
+    // Just test to see that the permission was created properly.
+    $account_yes = $this->drupalCreateUser(array('administer mymodule'));
+    $this->drupalLogin($account_yes);
+    $this->assertTrue(user_access('administer mymodule'), 'User has permission');
+  }
+}
+
+/**
+ * Tests page generation.
+ *
+ * @see mymodule_menu()
+ */
+class MyModulePagesTest extends ProgrammersGuideTestBase {
+  /**
+   * Array of generated nodes.
+   *
+   * @var array
+   */
+  protected $nodes = array();
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Pages',
+      'description' => 'Tests the pages generated by the module.',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    // Enable the book's module and Block, Node.
+    parent::setUp('mymodule', 'block', 'node');
+
+    // Generate 15 random nodes. Ensure the created times are in order.
+    for ($i = 0; $i < 15; $i++ ) {
+      $start = REQUEST_TIME - 30;;
+      $this->nodes[] = $this->drupalCreateNode(array(
+          'changed' => $start + $i,
+          'created' => $start + $i,
+        ));
+    }
+  }
+
+  /**
+   * Tests the pages generated by the module.
+   */
+  function testPages() {
+    $page_title = 'My page title';
+    $block_title = 'Overridden block title';
+    $text_in_block = array(
+      'General information goes here',
+      'Colors',
+      'Blue',
+      'Materials',
+      'Characteristic',
+      'Steel',
+      'Light',
+    );
+
+    // Several pages should not allow anonymous access. Test this.
+    $paths = array('mymodule/mypath', 'admin/content/mycontent/delete/5', 'mymodule/autocomplete');
+    foreach ($paths as $path) {
+      $this->drupalGet($path);
+      $this->assertResponse('403', "Access is denied to $path while not logged in");
+    }
+
+    // Test the form while not logged in. It should be visible, but the
+    // company field should not be visible.
+    $this->drupalGet('mymodule/my_form_page');
+    $this->assertTitleContains('Personal data form', 'Form page title is correct');
+    $this->assertText('First name', 'Name field is shown');
+    $this->assertNoText('Company', 'Company field is not shown to anonymous user');
+    // Submit the form.
+    $this->drupalPost(NULL, array('first_name' => 'Jennifer'), t('Submit'));
+    $this->assertText('Thank you Jennifer', 'Submit message is shown');
+
+    // Test alteration of the user register form.
+    $this->drupalGet('user/register');
+    $this->assertText('Company e-mail address', 'Email label has been altered');
+    $this->drupalPost(NULL, array('name' => 'foo', 'mail' => 'test@example.com'), t('Create new account'));
+    $this->assertText('You are not allowed to register', 'Validation message displayed');
+    $this->assertNoText('Thank you for applying', 'Registration message not displayed');
+
+    // Now log in and check the pages.
+    $account = $this->drupalCreateUser(array('administer mymodule', 'administer blocks', 'use company field', 'delete mycontent items'));
+    $this->drupalLogin($account);
+    $this->drupalGet('mymodule/mypath');
+    $this->assertResponse('200', 'Access is allowed to page while logged in');
+    $this->assertTitleContains($page_title, 'Page title is correct');
+    for($i = 5; $i < 15; $i++) {
+      $this->assertText($this->nodes[$i]->title, "Node title $i appears on the page");
+    }
+    for($i = 0; $i < 5; $i++) {
+      $this->assertNoText($this->nodes[$i]->title, "Node title $i does not appear on the page");
+    }
+
+    // Now go to the second page and test output.
+    $this->drupalGet('mymodule/mypath', array('query' => array('page' => 1)));
+    $this->assertTitleContains($page_title, 'Page title is correct');
+    for($i = 5; $i < 15; $i++) {
+      $this->assertNoText($this->nodes[$i]->title, "Node title $i does not appear on the page");
+    }
+    for($i = 0; $i < 5; $i++) {
+      $this->assertText($this->nodes[$i]->title, "Node title $i appears on the page");
+    }
+
+    // Place the module's block.
+    $this->placeBlock($block_title, 'mymodule/first_block', 'bartik', 'content');
+
+    // Visit the user account page and verify it is visible.
+    $this->drupalGet('user');
+    $this->assertText($block_title, 'Block title is visible');
+    foreach ($text_in_block as $text) {
+      $this->assertText($text, "Text $text appears on the page");
+    }
+
+    // Test the form.
+    $this->drupalGet('mymodule/my_form_page');
+    $this->assertTitleContains('Personal data form', 'Form page title is correct');
+    $this->assertText('First name', 'Name field is shown');
+    $this->assertText('Company', 'Company field is shown to user with permission');
+    // Submit the form.
+    $this->drupalPost(NULL, array('first_name' => 'Jennifer', 'company' => 'Poplar'), t('Submit'));
+    $this->assertText('Thank you Jennifer from Poplar', 'Submit message is shown');
+    // Test that JavaScript information is included.
+    $this->assertRaw('mymodule.js', 'JavaScript file is referenced');
+    $this->assertRaw('alert', 'In-line JavaScript is included');
+
+    // Test the confirm delete form.
+    $this->drupalGet('admin/content/mycontent/delete/5');
+    $this->assertText('Are you sure you want to delete content item 5?', 'Question is on the confirm form page');
+    // Try the cancel link. Should go to mymodule/mypath.
+    $this->clickLink(t('Cancel'));
+    $this->assertTitleContains($page_title, 'Cancel went to right place');
+    // Try submitting the form. Should go to mymodule/my_form_page.
+    $this->drupalPost('admin/content/mycontent/delete/5', array(), t('Confirm'));
+    $this->assertTitleContains('Personal data form', 'Form submit redirected to right place');
+    $this->assertText('Would have deleted 5', 'Submit message is displayed');
+
+    // Test the autocomplete path.
+    $this->drupalGet('mymodule/autocomplete/test');
+    $additions = array('add', 'choice', 'more', 'plus', 'something');
+    foreach ($additions as $word) {
+      $this->assertText('test' . $word, "Autocomplete choice for $word is in the output");
+    }
+  }
+}
+
+/**
+ * Tests the entity type, field widget, and field formatter.
+ */
+class MyModuleEntityTest extends ProgrammersGuideTestBase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Entity, field widget, and field formatter',
+      'description' => 'Tests the defined entity type, the field widget, and the field formatter.',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    // Enable the book's module and Entity API.
+    parent::setUp('mymodule', 'entity');
+
+    // Add a text field to the entity type, using the module's formatter
+    // and widget.
+
+    // Create a plain text field for a setting.
+    $field = field_create_field(array(
+        'field_name' => 'myentity_fieldtest',
+        'type' => 'text',
+        'entity_types' => array('myentity'),
+        'locked' => TRUE,
+        'translatable' => TRUE,
+      ));
+
+    // Attach the field to the entity bundle.
+    $instance = field_create_instance(array(
+        'field_name' => 'myentity_fieldtest',
+        'entity_type' => 'myentity',
+        'bundle' => 'myentity',
+        'label' => t('Field test'),
+        'required' => FALSE,
+        'widget' => array(
+          'type' => 'mymodule_mywidget',
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'mymodule_myformatter',
+          ),
+        ),
+      ));
+  }
+
+  /**
+   * Tests the entity type, widget, and formatter.
+   */
+  function testEntity() {
+    $account = $this->drupalCreateUser(array('administer myentity', 'view myentity'));
+    $this->drupalLogin($account);
+
+    // Entity admin page.
+    $this->drupalGet('admin/myentity');
+    $this->assertTitleContains('Settings for My Module', 'Page title on admin page is correct');
+
+    // Add a new entity.
+    $this->clickLink('Add settings for my module', 0);
+    $this->assertTitleContains('Add settings for my module', 'Page title on add form is correct');
+    $this->assertText(t('Setting 1'), 'Field label is present');
+    $this->assertText(t('Help for this setting'), 'Field help is present');
+    $this->assertText(t('Title'), 'Title label is present');
+    $this->assertRaw(t('x label'), 'X choice label is present');
+    $this->assertRaw(t('y label'), 'Y choice label is present');
+    $this->drupalPost(NULL, array(
+        'title' => 'Test settings',
+        'myentity_setting_1[und][0][value]' => 'Value for setting',
+        'myentity_fieldtest[und][0][value]' => 'x_stored',
+      ), t('Save'));
+    $this->assertTitleContains('Settings for My Module', 'Went back to admin page on save');
+    $this->assertLink('Test settings', 0, 'Title link is present');
+
+    // Edit this entity.
+    $this->clickLink('edit');
+    $this->drupalPost(NULL, array(
+        'title' => 'New title',
+        'myentity_setting_1[und][0][value]' => 'New value for setting',
+        'myentity_fieldtest[und][0][value]' => 'y_stored',
+      ), t('Save'));
+    $this->assertLink('New title', 0, 'Title link was updated');
+
+    // View the entity.
+    $this->clickLink('New title');
+    $this->assertTitleContains('New title', 'Page title is correct');
+    $this->assertText('New value for setting', 'Setting field is displayed');
+    $this->assertText('Predefined output text y', 'Custom field is displayed with custom display');
+
+    // Delete the entity.
+    $this->drupalGet('admin/myentity');
+    $this->clickLink('delete');
+    $this->assertText('Are you sure', 'Question is present');
+    $this->assertText('New title', 'Title is present');
+    $this->drupalPost(NULL, array(), t('Confirm'));
+    $this->assertTitleContains('Settings for My Module', 'Delete went back to admin page');
+    // Refresh the page and verify it is not there.
+    $this->drupalGet('admin/myentity');
+    $this->assertNoText('New title', 'Entity is not shown');
+
+    // Now add an entity back, log out, and verify access is denied.
+    $this->clickLink('Add settings for my module', 0);
+    $this->drupalPost(NULL, array(
+        'title' => 'Test settings',
+        'myentity_setting_1[und][0][value]' => 'Value for setting'), t('Save'));
+    $this->drupalLogout();
+
+    $paths = array('admin/myentity', 'myentity/2', 'admin/myentity/manage/2', 'admin/myentity/add', 'admin/myentity/manage/2/delete');
+    foreach ($paths as $path) {
+      $this->drupalGet($path);
+      $this->assertResponse('403', "Access is denied to $path while not logged in");
+    }
+  }
+}
+
+
+/**
+ * Tests Rules integration.
+ */
+class MyModuleRulesTest extends ProgrammersGuideTestBase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Rules',
+      'description' => 'Tests Rules module integration',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    // Enable the book's module and Rules and its dependencies.
+    parent::setUp('mymodule', 'rules', 'entity', 'entity_token');
+  }
+
+  /**
+   * Tests Rules integration.
+   */
+  function testRules() {
+
+    // Create a user.
+    $account = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($account);
+
+    // Generate a node.
+    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+
+    // There is a saved rule that uses a custom action. It should display
+    // "[username] is related to this content." on the page, where [username]
+    // is the author of the node.
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertText($account->name . ' is related to this content.', "Rules message is displayed");
+  }
+}
+
+/**
+ * Tests Ctools/Panels integration.
+ */
+class MyModulePanelsTest extends ProgrammersGuideTestBase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Panels and CTools',
+      'description' => 'Tests CTools and Panels integration',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    // Enable the book's module and several Panels modules.
+    parent::setUp('mymodule', 'ctools', 'panels', 'panels_mini', 'page_manager');
+  }
+
+  /**
+   * Tests Panels and CTools integration.
+   */
+  function testPanels() {
+
+    // Create a user.
+    $account = $this->drupalCreateUser(array('access content', 'administer blocks'));
+    $this->drupalLogin($account);
+
+    // Generate a node.
+    $node = $this->drupalCreateNode(array('uid' => $account->uid));
+
+    // Place the exported mini-panel block in the content section.
+    $this->placeBlock('Recent content', 'panels_mini/mymodule_test', 'bartik', 'content');
+
+    // Visit the user page and verify the block is working.
+    $this->drupalGet('user');
+    $this->assertText('Recent content', 'Block is visible');
+    $this->assertLink($node->title, 0, 'Link to authored node is visible');
+  }
+}
+
+/**
+ * Tests the theme code.
+ */
+class MyThemeTest extends ProgrammersGuideTestBase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Test theme',
+      'description' => 'Tests the theme code from the book.',
+      'group' => 'Programmers Guide to Drupal',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('block');
+
+    // Enable the book's theme.
+    theme_enable(array('mytheme'));
+    // Set it to be default, and re-initialize various things.
+    variable_set('theme_default', 'mytheme');
+    variable_initialize();
+    menu_rebuild();
+  }
+
+  /**
+   * Tests the theme.
+   */
+  function testTheme() {
+    // Log in.
+    $account = $this->drupalCreateUser(array('administer blocks'));
+    $this->drupalLogin($account);
+
+    // Verify that the new region is shown on the Blocks page.
+    $this->drupalGet('admin/structure/block');
+    $this->assertText('Readable region name');
+
+    // Place a block in the new region of this theme.
+    $block_title = 'This is a test.';
+    $this->placeBlock($block_title, 'system/powered-by', 'mytheme', 'internal_region_name');
+
+    // Visit the user profile page. Make sure block is shown.
+    $this->drupalGet('user');
+    $this->assertText($block_title, 'Block in custom region is shown');
+  }
+}

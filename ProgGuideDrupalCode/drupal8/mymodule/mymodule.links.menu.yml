@@ -1,0 +1,20 @@
+# Menu link from "Providing administrative links", chapter 4.
+
+# First line gives the machine name for the link.
+# Often it matches the route machine name given below.
+mymodule.mydescription:
+  # Link title and description.
+  title: 'Configure My Module'
+  description: 'Longer description goes here'
+  # Machine name for the parent link, from a *.links.menu.yml file.
+  parent: system.admin_structure
+  # Route machine name for this link.
+  route_name: mymodule.mydescription
+
+# Menu link from "Defining a Configuration Entity Type in Drupal 8", chapter 4.
+
+mymodule.myentity_type.list:
+  title: My entity subtypes
+  description: Manage my entity subtypes and their fields, display, etc.
+  route_name: mymodule.myentity_type.list
+  parent: system.admin_structure

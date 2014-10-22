@@ -1,0 +1,45 @@
+; Drupal 7 sample theme .info file
+
+; Comments start with ;
+
+; The name of the theme.
+name = My theme
+
+; Longer description for the Themes page.
+description = Sample theme for Programmers Guide to Drupal -- a Bartik sub-theme
+
+; Which version of Drupal this is for.
+core = 7.x
+
+; This is a derivative, using Bartik as the base theme.
+base theme = bartik
+
+; Theme regions. Only the Drupal core base regions will be automatically
+; present, so make sure to include all the regions from the base theme
+; .info file as well.
+
+; Custom region from section "Defining theme regions for block placement" in
+; Chapter 3.
+regions[internal_region_name] = Readable region name
+
+; Regions from themes/bartik/bartik/bartik.info file.
+regions[header] = Header
+regions[help] = Help
+regions[page_top] = Page top
+regions[page_bottom] = Page bottom
+regions[highlighted] = Highlighted
+
+regions[featured] = Featured
+regions[content] = Content
+regions[sidebar_first] = Sidebar first
+regions[sidebar_second] = Sidebar second
+
+regions[triptych_first] = Triptych first
+regions[triptych_middle] = Triptych middle
+regions[triptych_last] = Triptych last
+
+regions[footer_firstcolumn] = Footer first column
+regions[footer_secondcolumn] = Footer second column
+regions[footer_thirdcolumn] = Footer third column
+regions[footer_fourthcolumn] = Footer fourth column
+regions[footer] = Footer

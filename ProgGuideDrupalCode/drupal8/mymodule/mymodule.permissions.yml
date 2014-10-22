@@ -1,0 +1,18 @@
+# Sample permission from "Drupal core's main permission system" section
+# in Chapter 2.
+administer mymodule:
+  title: 'Administer My Module settings'
+  description: 'Longer description only if it is really necessary.'
+
+# Permission for \Drupal\mymodule\Form\PersonalDataForm.
+use company field:
+  title: 'Use the Company field'
+
+# Permission for route mymodule.delete_confirm.
+delete mycontent items:
+  title: 'Delete ficticious content items'
+
+# Permission for the entity from "Defining a Content Entity in Drupal 8",
+# chapter 4.
+administer my entities:
+  title: 'Administer my entities'

@@ -1,0 +1,19 @@
+# Drupal 8 sample module .info.yml file
+
+# Comments start with #
+
+# The name displayed on the Modules list page.
+name: 'My Module'
+
+# The longer description displayed on the Modules list.
+description: Sample module from Programmers Guide to Drupal
+
+# A required line telling Drupal this is a module.
+type: module
+
+# The Drupal core version this module is compatible with.
+core: 8.x
+
+# Dependencies on other modules.
+dependencies:
+  - user
