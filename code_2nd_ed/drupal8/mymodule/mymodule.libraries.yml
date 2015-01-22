@@ -1,0 +1,4 @@
+myjslib:
+  version: 1.x
+  js:
+    mymodule.js : {}

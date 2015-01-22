@@ -1,0 +1,110 @@
+# Route defined in "Registering for a URL in Drupal 8", chapter 4.
+
+# First line gives the machine name (route identifier) for the route.
+mymodule.mydescription:
+  # URL path you are registering for.
+  path: '/mymodule/mypath'
+  defaults:
+    # Class method that generates the page.
+    _controller: '\Drupal\mymodule\Controller\MyUrlController::generateMyPage'
+    # Title of the page.
+    _title: 'My page title'
+  requirements:
+    # Permission needed to access the page.
+    _permission: 'administer mymodule'
+
+# Route from "Basic Form Generation and Processing in Drupal 8", chapter 4.
+
+mymodule.personal_data_form:
+  path: '/mymodule/my_form_page'
+  defaults:
+    _form: '\Drupal\mymodule\Form\PersonalDataForm'
+    _title: 'Personal data form'
+  requirements:
+    _access: 'TRUE'
+
+# Route from "Creating Confirmation Forms", chapter 4.
+
+mymodule.delete_confirm:
+  path: '/admin/content/mycontent/delete/{id}'
+  defaults:
+    _form: '\Drupal\mymodule\Form\ConfirmDeleteForm'
+    _title: 'Delete content item?'
+  requirements:
+    _permission: 'delete mycontent items'
+
+# Route from "Adding Auto-Complete to Forms", chapter 4.
+
+mymodule.autocomplete:
+  path: '/mymodule/autocomplete'
+  defaults:
+    _controller: '\Drupal\mymodule\Controller\MyUrlController::autocomplete'
+  requirements:
+    _permission: 'use company field'
+
+# Routes from "Defining a Content Entity Type in Drupal 8", chapter 4.
+
+entity.myentity.canonical:
+  path: '/myentity/{myentity}'
+  defaults:
+    _entity_view: 'myentity.full'
+  requirements:
+    _entity_access: 'myentity.view'
+
+entity.myentity.delete_form:
+  path: '/myentity/{myentity}/delete'
+  defaults:
+    _entity_form: 'myentity.delete'
+    _title: 'Delete'
+  requirements:
+    _entity_access: 'myentity.delete'
+
+entity.myentity.edit_form:
+  path: '/myentity/{myentity}/edit'
+  defaults:
+    _entity_form: 'myentity.edit'
+    _title: 'Edit my entity'
+  requirements:
+    _entity_access: 'myentity.edit'
+
+# Routes from "Defining a Configuration Entity Type in Drupal 8", chapter 4.
+
+mymodule.myentity_type.list:
+  path: '/admin/structure/myentity_type'
+  defaults:
+    _entity_list: 'myentity_type'
+    _title: 'My entity subtypes'
+  requirements:
+    _permission: 'administer my entities'
+
+entity.myentity_type.add_form:
+  path: '/admin/structure/myentity_type/add'
+  defaults:
+    _entity_form: 'myentity_type.add'
+    _title: 'Add my entity subtype'
+  requirements:
+    _entity_create_access: 'myentity_type'
+
+entity.myentity_type.edit_form:
+  path: '/admin/structure/myentity_type/manage/{myentity_type}'
+  defaults:
+    _entity_form: 'myentity_type.edit'
+    _title: 'Edit my entity subtype'
+  requirements:
+    _entity_access: 'myentity_type.edit'
+
+entity.myentity_type.delete_form:
+  path: '/admin/structure/myentity_type/delete/{myentity_type}'
+  defaults:
+    _entity_form: 'myentity_type.delete'
+    _title: 'Delete my entity subtype'
+  requirements:
+    _entity_access: 'myentity_type.delete'
+
+mymodule.myentity.add:
+  path: '/myentity/add/{myentity_type}'
+  defaults:
+    _controller: '\Drupal\mymodule\Controller\MyUrlController::addEntityPage'
+    _title: 'Add new my entity'
+  requirements:
+    _entity_create_access: 'myentity'

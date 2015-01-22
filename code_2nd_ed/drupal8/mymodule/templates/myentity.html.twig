@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Template for rendering an entity
+ *
+ * From "Defining a Content Entity Type in Drupal 8", chapter 4
+ *
+ * Available variables:
+ * - myentity: My Entity entity.
+ *   - eid: Entity ID.
+ *   - subtype: Entity subtype.
+ *   - title: Entity title.
+ * - attributes: HTML attributes for the containing element.
+ * - page: TRUE if this is on its own page.
+ * - title: Title of the entity.
+ * - title_attributes: Attributes for the title element.
+ * - content: Content of the entity.
+ * - content_attributes: Attributes for the content attribute.
+
+ * @see mymodule_theme()
+ * @see template_preprocess_myentity()
+ */
+#}
+<article{{ attributes }}>
+  {% if not page %}
+    <h2{{ title_attributes }}>
+      <a href="{{ url }}" rel="bookmark">{{ title }}</a>
+    </h2>
+  {% endif %}
+
+  <div {{ content_attributes }}>
+    {{ content }}
+  </div>
+
+</article>

@@ -1,0 +1,113 @@
+<?php
+
+/**
+ * @file
+ * Sample module for Drupal 8.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+
+/**
+ * Implements hook_theme().
+ *
+ * To use the first theme hook in a render array:
+ * @code
+ * $build['hello'] = array(
+ *   '#input1' => t('Hello World!'),
+ *   '#theme' => 'mymodule_hookname',
+ * );
+ * @endcode
+ *
+ * @see mymodule-hookname.html.twig
+ */
+function mymodule_theme($existing, $type, $theme, $path) {
+  return array(
+    // Theme hook from section "Making Your Output Themeable" in Chapter 2.
+
+    // The array keys are names of the theme hooks you are defining.
+    'mymodule_hookname' => array(
+       // Input variables.
+       'variables' => array(
+         // These are passed as an array to the rendering system, which
+         // passes them on to your theme template. Here, provide default values.
+         'input1' => '',
+       ),
+       // Name of the template file (without .html.twig extension).
+       'template' => 'mymodule-hookname',
+    ),
+
+    // Theme hook for entity from "Defining a Content Entity Type in Drupal
+    // 8", chapter 4.
+    'myentity' => array(
+      'render element' => 'elements',
+      'template' => 'myentity',
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_register_form().
+ *
+ * From "Altering forms", chapter 4.
+ *
+ * @see mymodule_validate_register_email()
+ */
+function mymodule_form_user_register_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  // Change the label on the email address field.
+  $form['account']['mail']['#title'] = t('Company e-mail address');
+
+  // Add a validation function.
+  $form['#validate'][] = 'mymodule_validate_register_email';
+}
+
+/**
+ * Validation for mymodule_form_user_register_form_alter().
+ *
+ * From "Altering forms", chapter 4.
+ */
+function mymodule_validate_register_email($form, FormStateInterface $form_state) {
+  $values = $form_state->getValues();
+  $email = $values['mail'];
+
+  // Check that the email is within the company domain.
+  $parts = explode('@', $email);
+  $company = 'poplarware.com';
+  if (count($parts) != 2 || $parts[1] != $company) {
+    $form_state->setErrorByName('mail', t('You are not allowed to register'));
+  }
+}
+
+/**
+ * Preprocesses My Entity entities.
+ *
+ * From "Defining a Content Entity Type in Drupal 8", chapter 4.
+ */
+function template_preprocess_myentity(&$variables) {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $entity = $variables['elements']['#myentity'];
+  $variables['entity'] = $entity;
+  $variables['title'] = $variables['entity']->getTitle();
+
+  // See if the entity is being viewed on its own page.
+  $route_match = \Drupal::routeMatch();
+  $page = FALSE;
+  if ($variables['view_mode'] == 'full' &&
+      $route_match->getRouteName() == 'entity.myentity.canonical') {
+    $page_entity = $route_match->getParameter('myentity');
+    if ($page_entity && $page_entity->id() == $entity->id()) {
+      $page = TRUE;
+    }
+  }
+  $variables['page'] = $page;
+
+  // Set up content variable for templates.
+  $variables += array('content' => array());
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  // Set up attributes.
+  $variables['attributes']['class'][] = 'myentity';
+}

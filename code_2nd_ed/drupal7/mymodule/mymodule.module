@@ -1,0 +1,978 @@
+<?php
+
+/**
+ * @file
+ * Sample module for Drupal 7.
+ */
+
+/**
+ * Implements hook_theme().
+ *
+ * From section "Making Your Output Themeable" in Chapter 2.
+ *
+ * To use the first theme hook in a render array:
+ * @code
+ * $build['hello'] = array(
+ *   '#input1' => t('Hello World!'),
+ *   '#theme' => 'mymodule_hookname',
+ * );
+ * @endcode
+ *
+ * To use the second theme hook in a call to theme() directly:
+ * @code
+ * $data = array('input1' => t('Hello World!'));
+ * $output = theme('mymodule_hookname_2', $data);
+ * @endcode
+ *
+ * @see theme_mymodule_hookname_2()
+ * @see mymodule-hookname.tpl.php
+ */
+function mymodule_theme($existing, $type, $theme, $path) {
+  return array(
+    // The array keys are names of the theme hooks you are defining.
+    'mymodule_hookname' => array(
+       // Input variables.
+       'variables' => array(
+         // These are passed as an array to theme(), which passes them on
+         // to your theme function or template. Here, provide default values.
+         'input1' => '',
+       ),
+       // If you want to use a template, include this line; for a theme
+       // function, leave it out.
+       'template' => 'mymodule-hookname',
+    ),
+
+    // Define a second theme hook, using a theme function.
+    'mymodule_hookname_2' => array(
+       'variables' => array(
+         'input1' => '',
+       ),
+    ),
+  );
+}
+
+/**
+ * Sample theme function to go with the hook_theme() implementation.
+ *
+ * This produces the same output as mymodule-hookname.tpl.php, but using
+ * a theme function.
+ *
+ * From section "Making Your Output Themeable" in Chapter 2.
+ *
+ * @see mymodule_theme()
+ * @see mymodule-hookname.tpl.php
+ */
+function theme_mymodule_hookname_2($variables) {
+   return '<div>' . $variables['input1'] . '</div>';
+}
+
+/**
+ * Implements hook_permission().
+ */
+function mymodule_permission() {
+  return array(
+    // Sample permission from "Drupal core's main permission system" section
+    // in Chapter 2.
+
+    // The array keys in hook_permission() are the permissions' machine names.
+    'administer mymodule' => array(
+      'title' => t('Administer My Module settings'), // Human-readable name.
+      'description' => t('Longer description only if it is really necessary.'),
+    ),
+
+    // Permission for mymodule_personal_data_form().
+    'use company field' => array(
+      'title' => t('Use the Company field'),
+    ),
+
+    // Permission for confirmation form.
+    'delete mycontent items' => array(
+      'title' => t('Delete ficticious content items'),
+    ),
+
+    // Entity access permissions, from "Defining an Entity Type in Drupal 7",
+    // chapter 4.
+    'view myentity' => array(
+       'title' => t('View my entity content'),
+    ),
+    'administer myentity' => array(
+       'title' => t('Administer my entities'),
+    ),
+
+  );
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * @see mymodule_page_generate()
+ * @see mymodule_personal_data_form()
+ * @see mymodule_confirm_delete()
+ * @see mymodule_autocomplete()
+ * @see mymodule_entity_info()
+ * @see mymodule_myentity_uri()
+ */
+function mymodule_menu() {
+  $items = array();
+
+  // First path is from "Registering for a URL in Drupal 7" section, chapter 4.
+
+  // The array key is the URL path.
+  $items['mymodule/mypath'] = array(
+    // Do not translate this! It will be translated when it is output.
+    'title' => 'My page title',
+
+    // Function that will generate the content.
+    'page callback' => 'mymodule_page_generate',
+
+    // Function used to check permissions. This defaults to user_access(),
+    // which is provided here as an illustration -- you can omit this line
+    // if you want to use the user_access() function. Put the name of your
+    // custom access check function here if you have one.
+    'access callback' => 'user_access',
+
+    // Arguments needed for your access callback function. If using the
+    // default user_access() function, the argument is the name of the
+    // permission a user must have to access the page.
+    'access arguments' => array('administer mymodule'),
+  );
+
+  // Second path is from "Basic Form Generation and Processing in Drupal 7",
+  // chapter 4.
+
+  $items['mymodule/my_form_page'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mymodule_personal_data_form'),
+    'access callback' => TRUE,
+    'title' => 'Personal data form',
+  );
+
+  // Third path is from "Creating Confirmation Forms", chapter 4.
+
+  // Assume there is a content ID number.
+  $items['admin/content/mycontent/delete/%'] = array(
+    'title' => 'Delete content item?',
+    'page callback' => 'drupal_get_form',
+    // Pass the content ID number to the form generating function.
+    // It is position 4 in the path (starting from 0).
+    'page arguments' => array('mymodule_confirm_delete', 4),
+    // Permission needs to be defined in a hook_permission().
+    'access arguments' => array('delete mycontent items'),
+  );
+
+  // Fourth path is for autocomplete, from "Adding Auto-Complete to Forms",
+  // chapter 4.
+
+  $items['mymodule/autocomplete'] = array(
+    'page callback' => 'mymodule_autocomplete',
+    'access arguments' => array('use company field'),
+    'type' => MENU_CALLBACK,
+  );
+
+  // Fifth path is for displaying an entity, from "Defining an Entity Type
+  // in Drupal 7", chapter 4. If you do not need a page for displaying the
+  // entity (for internal-use settings storage, for instance), you do not
+  // need this path entry and the callbacks it references.
+
+  // Register for the URL that mymodule_myentity_uri() returns.
+  // The placeholder %entity_object in the URL is handled by the Entity
+  // API function entity_object_load().
+  $items['myentity/%entity_object'] = array(
+    // entity_object_load() needs to know what the entity type is.
+    'load arguments' => array('myentity'),
+
+    // Use a callback for the page title, not a static title.
+    'title callback' => 'mymodule_myentity_page_title',
+    'title arguments' => array(1),
+
+    // Callback to display the entity.
+    'page callback' => 'entity_ui_entity_page_view',
+    'page arguments' => array(1),
+
+    // Access callback.
+    'access callback' => 'mymodule_myentity_access',
+    'access arguments' => array('view', array(1)),
+  );
+
+  return $items;
+}
+
+/**
+ * Generates page content for path 'mymodule/mypath'.
+ *
+ * Function body from "Generating paged output", in Chapter 4.
+ */
+function mymodule_page_generate() {
+  // Find the most recently updated nodes.
+
+  // Note: You should really use the Views module to do this! Code is
+  // only here to illustrate using the PagerDefault extension to a query,
+  // and 'pager' theme in a render array.
+
+  $query = db_select('node', 'n')
+    ->fields('n', array('title'))
+    ->orderBy('n.created', 'DESC')
+    // Be sure to check permissions, and only show published items.
+    ->addTag('node_access')
+    ->condition('n.status', 1)
+    // Put this last, because the return value is a new object.
+    ->extend('PagerDefault');
+
+  // This only applies with the PagerDefault extension.
+  $query->limit(10);
+  $result = $query->execute();
+
+  // Extract and sanitize the information from the query result.
+  $titles = array();
+  foreach ($result as $row) {
+    $titles[] = check_plain($row->title);
+  }
+
+  // Make the render array for a paged list of titles.
+  $build = array();
+
+  // The list of titles.
+  $build['items'] = array(
+    '#theme' => 'item_list',
+    '#items' => $titles,
+  );
+
+  // The pager.
+  $build['item_pager'] = array('#theme' => 'pager');
+
+  return $build;
+}
+
+/**
+ * Implements hook_block_info().
+ *
+ * From "Registering a Block in Drupal 7", chapter 4.
+ */
+function mymodule_block_info() {
+  $blocks = array();
+
+  // The array key is known as the block "delta" (a unique identifier
+  // within your module), and is used in other block hooks. Choose
+  // something descriptive.
+  $blocks['first_block'] = array(
+    // The name shown on the Blocks administration page.
+    // Be descriptive and unique across all blocks.
+    'info' => t('First block from My Module'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * From "Registering a Block in Drupal 8", chapter 4.
+ */
+function mymodule_block_view($delta = '') {
+  if ($delta == 'first_block') {
+    return array(
+      // The block's default title.
+      'subject' => t('First block'),
+      // The block's content.
+      'content' => mymodule_block_generate(),
+    );
+  }
+}
+
+/**
+ * Generates block content for mymodule_block_view().
+ *
+ * Function body from "Creating Render Arrays for Page and Block Output",
+ * chapter 4.
+ */
+function mymodule_block_generate() {
+  // Build a render array.
+  $output = array(
+    // Introductory paragraph, using the elemnt type 'markup'.
+    'introduction' => array(
+      '#type' => 'markup',
+      '#markup' => '<p>' . t('General information goes here.') . '</p>',
+    ),
+
+    // List of items, using the theme hook 'item_list'.
+    'colors' => array(
+      '#theme' => 'item_list',
+      '#items' => array(t('Red'), t('Blue'), t('Green')),
+      '#title' => t('Colors'),
+    ),
+
+    // Table, using the theme hook 'table'.
+    'materials' => array(
+      '#theme' => 'table',
+      '#caption' => t('Materials'),
+      '#header' => array(t('Material'), t('Characteristic')),
+      '#rows' => array(
+        array(t('Steel'), t('Strong')),
+        array(t('Aluminum'), t('Light')),
+      ),
+    ),
+  );
+
+  return $output;
+}
+
+/**
+ * Form constructor for a personal data form.
+ *
+ * From "Basic Form Generation and Processing in Drupal 7", chapter 4.
+ *
+ * Most of form array is from "Form Arrays, Form State Arrays, and
+ * Form State Objects", chapter 4.
+ *
+ * Auto-complete field from "Adding Auto-Complete to Forms", chapter 4.
+ *
+ * JavaScript attachment from "Creating Render Arrays for Page and Block
+ * Output", chapter 4.
+ *
+ * Ajax fields from "Setting Up a Form for Ajax", chapter 4.
+ *
+ * @see mymodule_permission()
+ * @see mymodule_personal_data_form_submit()
+ * @see mymodule_autocomplete()
+ * @see mymodule_ajax_text_callback()
+ * @see mymodule_ajax_button_callback()
+ */
+function mymodule_personal_data_form($form, &$form_state) {
+  // Define the form array.
+
+  // Plain text input element for first name.
+  $form['first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First name'),
+  );
+
+  // Plain text element for company name, only visible to some
+  // users.
+  $form['company'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Company'),
+    // This assumes permission 'use company field' has been defined.
+    '#access' => user_access('use company field'),
+  );
+
+  $my_information = 'stuff';
+
+  // Some hidden information to be used later.
+  $form['information'] = array(
+    '#type' => 'value',
+    '#value' => $my_information,
+  );
+
+  // Submit button.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  // Attach a JavaScript file.
+  $form['#attached']['js'][] =
+    drupal_get_path('module', 'mymodule') . '/mymodule.js';
+
+  // Attach some in-line JavaScript code.
+  $my_code = 'alert("Hello!");';
+  $form['#attached']['js'][] = array(
+    'type' => 'inline',
+    'data' => $my_code,
+  );
+
+  // Auto-complete field.
+  $form['my_autocomplete_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Autocomplete field'),
+    '#autocomplete_path' => 'mymodule/autocomplete',
+  );
+
+  // Ajax elements.
+
+  $form['ajax_output_1'] = array(
+    '#type' => 'markup',
+    '#markup' => '<div id="ajax-output-spot"></div>',
+  );
+
+  $form['text_trigger'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Type here to trigger Ajax'),
+    '#ajax' => array(
+      'event' => 'keyup',
+      'wrapper' => 'ajax-output-spot',
+      'callback' => 'mymodule_ajax_text_callback',
+    ),
+  );
+
+  $form['ajax_output_2'] = array(
+    '#type' => 'markup',
+    '#markup' => '<div id="other-ajax-spot"></div>',
+  );
+
+  $form['button_trigger'] = array(
+    '#type' => 'button',
+    '#value' => t('Click here to trigger Ajax'),
+    '#ajax' => array(
+      'callback' => 'mymodule_ajax_button_callback',
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for mymodule_personal_data_form().
+ *
+ * From "Basic Form Generation and Processing in Drupal 7", chapter 4.
+ */
+function mymodule_personal_data_form_submit(&$form, &$form_state) {
+  // The values submitted by the user are in $form_state['values'].
+  $name = $form_state['values']['first_name'];
+  // Values you stored in the form array are also available.
+  $info = $form_state['values']['information'];
+
+  // Get another value, using a method where it could be nested.
+  $parents = $form['company']['#array_parents'];
+  $company = drupal_array_get_nested_value($form_state['values'], $parents);
+
+  // Processing code would go here. As a proxy, display a message with the
+  // values. Note that since the values are unsanitized, insert them
+  // into t() with @variable. If inserting into the database, do not
+  // sanitize.
+  if ($company) {
+    drupal_set_message(t('Thank you @name from @company', array('@name' => $name, '@company' => $company)));
+  }
+  else {
+    drupal_set_message(t('Thank you @name', array('@name' => $name)));
+  }
+
+  // Make sure the form is rebuilt properly for Ajax.
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Generates autocompletes for path mymodule/autocomplete.
+ *
+ * From "Adding Auto-Complete to Forms", chapter 4.
+ *
+ * @see mymodule_personal_data_form()
+ */
+function mymodule_autocomplete($string = '') {
+  $matches = array();
+  if ($string) {
+    // Sanitize $string and find appropriate matches -- about 10 or fewer.
+    // Put them into $matches as $key => $visible text.
+    $string = check_plain($string);
+
+    // As a proxy, just add some text to the end of the submitted text.
+    $additions = array('add', 'choice', 'more', 'plus', 'something');
+    foreach ($additions as $word) {
+      $choice = $string . $word;
+      $matches[$choice] = $choice;
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+/**
+ * Processes the Ajax response for the text field.
+ *
+ * From "Wrapper-based Ajax Callback Functions", chapter 4.
+ *
+ * @see mymodule_personal_data_form()
+ */
+function mymodule_ajax_text_callback($form, &$form_state) {
+  // Read the text from the text field.
+  $text = $form_state['values']['text_trigger'];
+  if (!$text) {
+    $text = t('nothing');
+  }
+
+  // Set a message.
+  drupal_set_message(t('You have triggered Ajax'));
+
+  // Return a render array for markup to replace the wrapper <div> contents.
+  return array(
+    '#type' => 'markup',
+    // Text was not sanitized, so use @variable in t() to sanitize.
+    // Be sure to include the wrapper div!
+    '#markup' => '<div id="ajax-output-spot">' . t('You typed @text', array('@text' => $text)) . '</div>',
+  );
+}
+
+/**
+ * Processes the Ajax response for the button.
+ *
+ * From "Command-based Ajax Callback Functions in Drupal 7", chapter 4.
+ *
+ * @see mymodule_personal_data_form()
+ */
+function mymodule_ajax_button_callback($form, &$form_state) {
+  $commands = array();
+
+  // Replace HTML markup inside the div via a selector.
+  $text = t('The button has been clicked');
+  $commands[] = ajax_command_html('div#other-ajax-spot', $text);
+
+  // Add some CSS to the div.
+  $css = array('background-color' => '#ddffdd', 'color' => '#000000');
+  $commands[] = ajax_command_css('div#other-ajax-spot', $css);
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Form constructor for delete confirmation form.
+ *
+ * From "Creating Confirmation Forms", chapter 4.
+ *
+ * @see mymodule_confirm_delete_submit()
+ */
+function mymodule_confirm_delete($form, $form_state, $id) {
+  // Save the ID for the submission function.
+  $form['mycontent_id'] = array(
+    '#type' => 'value',
+    '#value' => $id,
+  );
+
+  return confirm_form($form,
+    // You could load the item and display the title here, if it
+    // were a real content item.
+    t('Are you sure you want to delete content item %id?',
+      array('%id' => $id)),
+    // The URL path to return to if the user cancels.
+    'mymodule/mypath');
+}
+
+/**
+ * Form submission handler for mymodule_confirm_delete().
+ *
+ * From "Creating Confirmation Forms", chapter 4.
+ */
+function mymodule_confirm_delete_submit($form, $form_state) {
+  // Read the ID saved in the form.
+  $id = $form_state['values']['mycontent_id'];
+  // Sanitize.
+  $id = (int) $id;
+
+  // Perform the data deletion, if it were real. As a proxy, just put up
+  // a message.
+  drupal_set_message(t('Would have deleted !id', array('!id' => $id)));
+
+  // Redirect somewhere.
+  drupal_goto('mymodule/my_form_page');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_register_form().
+ *
+ * From "Altering forms", chapter 4.
+ *
+ * @see mymodule_validate_register_email()
+ */
+function mymodule_form_user_register_form_alter(&$form, &$form_state, $form_id) {
+  // Change the label on the email address field.
+  $form['account']['mail']['#title'] = t('Company e-mail address');
+
+  // Add a validation function.
+  $form['#validate'][] = 'mymodule_validate_register_email';
+}
+
+/**
+ * Validation for mymodule_form_user_register_form_alter().
+ *
+ * From "Altering forms", chapter 4.
+ */
+function mymodule_validate_register_email($form, $form_state) {
+  $email = $form_state['values']['mail'];
+
+  // Check that the email is within the company domain.
+  $parts = explode('@', $email);
+  $company = 'poplarware.com';
+  if (count($parts) != 2 || $parts[1] != $company) {
+    form_set_error('mail', t('You are not allowed to register'));
+  }
+}
+
+/**
+ * Implements hook_entity_info().
+ *
+ * From "Defining an Entity Type in Drupal 7", chapter 4.
+ */
+function mymodule_entity_info() {
+  $return = array();
+
+  $return['myentity'] = array(
+
+    // Define basic information.
+    'label' => t('Settings for My Module'),
+    'plural label' => t('Settings for My Module'),
+    'fieldable' => TRUE,
+
+    // Provide information about the database table.
+    'base table' => 'mymodule_myentity',
+    'entity keys' => array(
+      'id' => 'myentity_id',
+      'label' => 'title',
+    ),
+
+    // Use classes from the Entity API module.
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+
+    // Have Entity API set up an administrative UI.
+    'admin ui' => array(
+       'path' => 'admin/myentity',
+    ),
+    'module' => 'mymodule',
+    'access callback' => 'mymodule_myentity_access',
+
+    // Normally, this would be for content-type entities only.
+    // For illustration purposes, we'll go ahead and define it
+    // anyway -- it's the URL for the page where this entity is
+    // displayed.
+    'uri callback' => 'mymodule_myentity_uri',
+  );
+
+  return $return;
+}
+
+/**
+ * Returns the URL for the entity.
+ *
+ * From "Defining an Entity Type in Drupal 7", chapter 4.
+ */
+function mymodule_myentity_uri($entity) {
+  return array(
+    'path' => 'myentity/' . $entity->myentity_id,
+  );
+}
+
+/**
+ * Title callback: Returns the title for an entity display page.
+ *
+ * From "Defining an Entity Type in Drupal 7", chapter 4.
+ */
+function mymodule_myentity_page_title($entity) {
+  return $entity->title;
+}
+
+/**
+ * Access callback: Checks entity access.
+ *
+ * From "Defining an Entity Type in Drupal 7", chapter 4.
+ *
+ * @param string $op
+ *   Operation to check: 'view', 'update', 'create', etc.
+ * @param object|null $entity
+ *   Object to check access on, or NULL to check for all entities.
+ * @param object|null $account
+ *   Account to check access permissions for. NULL means "current user".
+ *
+ * @return bool
+ *   TRUE to allow access; FALSE to deny access.
+ */
+function mymodule_myentity_access($op, $entity, $account = NULL) {
+  if ($op == 'view') {
+    return user_access('view myentity', $account);
+  }
+
+  // All other operations use the generic "administer" permission.
+  return user_access('administer myentity', $account);
+}
+
+/**
+ * Form constructor for the entity edit form.
+ *
+ * From "Defining an Entity Type in Drupal 7", chapter 4.
+ *
+ * @see myentity_form_submit()
+ */
+function myentity_form($form, $form_state, $entity) {
+  // Include the properties of the entity: title, language.
+  $form['title'] = array(
+    '#title' => t('Title'),
+    '#type' => 'textfield',
+    '#default_value' => isset($entity->title) ? $entity->title : '',
+  );
+
+  // Build language options list.
+  $default = language_default();
+  $options = array($default->language => $default->name);
+  if (module_exists('locale')) {
+    $options = array(LANGUAGE_NONE => t('All languages')) +
+      locale_language_list('name');
+  }
+
+  // Add language selector or value to the form.
+  $langcode = isset($entity->language) ? $entity->language : '';
+  if (count($options) > 1) {
+    $form['language'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#options' => $options,
+      '#default_value' => $langcode,
+    );
+  }
+  else {
+    $form['language'] = array(
+      '#type' => 'value',
+      '#value' => $langcode,
+    );
+  }
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 999,
+  );
+
+  // Let Field module handle the rest.
+  field_attach_form('myentity', $entity, $form, $form_state, $langcode);
+
+  return $form;
+}
+
+/**
+ * Form submit handler for myentity_form().
+ *
+ * From "Defining an Entity Type in Drupal 7", chapter 4.
+ */
+function myentity_form_submit($form, &$form_state) {
+  // Make use of Entity API class.
+  $entity = entity_ui_form_submit_build_entity($form, $form_state);
+  $entity->save();
+
+  // Redirect to the management page.
+  $form_state['redirect'] = 'admin/myentity';
+}
+
+/**
+ * Implements hook_field_widget_info().
+ *
+ * From "Defining a field widget in Drupal 7", chapter 4.
+ *
+ * @see mymodule_field_widget_form()
+ */
+function mymodule_field_widget_info() {
+  return array(
+    // Machine name of the widget.
+    'mymodule_mywidget' => array(
+
+      // Label for the administrative UI.
+      'label' => t('Custom text input'),
+
+      // Field types it supports.
+      'field types' => array('text'),
+    ),
+
+    // Define additional widgets here, if desired.
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ *
+ * From "Defining a field widget in Drupal 7", chapter 4.
+ *
+ * @see mymodule_field_widget_info()
+ */
+function mymodule_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+
+  // Verify the widget type. Only needed if you define more than one
+  // widget.
+  if ($instance['widget']['type'] == 'mymodule_mywidget') {
+    // Find the current text field value.
+    $value = isset($items[$delta]['value']) ? $items[$delta]['value'] : NULL;
+
+    // Set up the editing form element. Substitute your custom
+    // code here, instead of using an HTML select.
+    $element['value'] = array(
+      '#type' => 'select',
+      '#options' => array('x_stored' => t('x label'), 'y_stored' => t('y label')),
+      '#default_value' => $value,
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * From "Defining a field formatter in Drupal 7", chapter 4.
+ *
+ * @see mymodule_field_formatter_view()
+ */
+function mymodule_field_formatter_info() {
+  return array(
+
+    // Machine name of the formatter.
+    'mymodule_myformatter' => array(
+
+      // Label for the administrative UI.
+      'label' => t('Custom text output'),
+
+      // Field types it supports.
+      'field types' => array('text'),
+    ),
+
+    // Define additional formatters here.
+  );
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * From "Defining a field formatter in Drupal 7", chapter 4.
+ *
+ * @see mymodule_field_formatter_info()
+ */
+function mymodule_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+
+  $output = array();
+
+  // Verify the formatter type.
+  if ($display['type'] == 'mymodule_myformatter') {
+
+    // Handle multi-valued fields.
+    foreach ($items as $delta => $item) {
+
+      // See which option was selected.
+      switch ($item['value']) {
+        case 'x_stored':
+          // Output the corresponding text or icon.
+          $output[$delta] = array('#markup' => '<p>' . t('Predefined output text x') . '</p>');
+          break;
+
+        case 'y_stored':
+          // Output the corresponding text or icon.
+          $output[$delta] = array('#markup' => '<p>' . t('Predefined output text y') . '</p>');
+          break;
+
+        // Handle other options here.
+      }
+    }
+  }
+
+  return $output;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * From "Notifying CTools About Plugin Implementations" in chapter 4.
+ */
+function mymodule_ctools_plugin_directory($module, $plugin) {
+  // Define a directory structure for plugins, so for instance a
+  // 'relationships' plugin (type defined by the 'ctools' module) would
+  // go into directory plugins/ctools-relationships.
+  return 'plugins/' . $module . '-' . $plugin;
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ *
+ * From "Providing Default CTools Exportables", chapter 4.
+ */
+function mymodule_ctools_plugin_api() {
+  return array(
+    // The API version.
+    'api' => 1,
+  );
+}
+
+/**
+ * Implements hook_default_panels_mini().
+ *
+ * From "Providing Default CTools Exportables", chapter 4.
+ */
+function mymodule_default_panels_mini() {
+  $minis = array();
+
+  // Paste exported Mini Panel code here.
+  // --- Start of export ---
+  $mini = new stdClass();
+  $mini->disabled = FALSE; /* Edit this to true to make a default mini disabled initially */
+  $mini->api_version = 1;
+  $mini->name = 'mymodule_test';
+  $mini->category = '';
+  $mini->admin_title = 'My Module Test';
+  $mini->admin_description = '';
+  $mini->requiredcontexts = array();
+  $mini->contexts = array(
+    0 => array(
+      'identifier' => 'User',
+      'keyword' => 'user',
+      'name' => 'user',
+      'type' => 'current',
+      'uid' => '',
+      'id' => 1,
+    ),
+  );
+  $mini->relationships = array(
+    0 => array(
+      'identifier' => 'Most recent node',
+      'keyword' => 'node',
+      'name' => 'mymodule_relationship_most_recent_content',
+      'context' => 'context_user_1',
+      'id' => 1,
+    ),
+  );
+  $display = new panels_display();
+  $display->layout = 'onecol';
+  $display->layout_settings = array();
+  $display->panel_settings = array(
+    'style_settings' => array(
+      'default' => NULL,
+      'middle' => NULL,
+    ),
+  );
+  $display->cache = array();
+  $display->title = 'Most Recently Wrote';
+  $display->uuid = '521e9c79-65b2-484f-ba30-b398be1f3987';
+  $display->content = array();
+  $display->panels = array();
+  $pane = new stdClass();
+  $pane->pid = 'new-c6ad4d39-3c42-4689-a5ff-4f75594a06df';
+  $pane->panel = 'middle';
+  $pane->type = 'node_title';
+  $pane->subtype = 'node_title';
+  $pane->shown = TRUE;
+  $pane->access = array();
+  $pane->configuration = array(
+    'link' => 1,
+    'markup' => 'none',
+    'id' => '',
+    'class' => '',
+    'context' => 'relationship_mymodule_relationship_most_recent_content_1',
+    'override_title' => 0,
+    'override_title_text' => '',
+  );
+  $pane->cache = array();
+  $pane->style = array(
+    'settings' => NULL,
+  );
+  $pane->css = array();
+  $pane->extras = array();
+  $pane->position = 0;
+  $pane->locks = array();
+  $pane->uuid = 'c6ad4d39-3c42-4689-a5ff-4f75594a06df';
+  $display->content['new-c6ad4d39-3c42-4689-a5ff-4f75594a06df'] = $pane;
+  $display->panels['middle'][0] = 'new-c6ad4d39-3c42-4689-a5ff-4f75594a06df';
+  $display->hide_title = PANELS_TITLE_FIXED;
+  $display->title_pane = '0';
+  $mini->display = $display;
+  // --- End of export ---
+
+  // After the export is pasted, you'll have $mini holding one exported
+  // mini-panel. Put it into the return array.
+  $minis['mymodule_test'] = $mini;
+
+  // Add additional mini-panels here.
+
+  // Return them all.
+  return $minis;
+}

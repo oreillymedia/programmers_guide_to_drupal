@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for sample module.
+ */
+
+/**
+ * Implements hook_schema().
+ *
+ * From "Setting up Database Tables" section in Chapter 2.
+ */
+function mymodule_schema() {
+  $schema = array();
+  $schema['mymodule_foo'] = array(
+    'description' => 'Untranslated description of this table',
+    'fields' => array(
+      'bar' => array(
+        'description' => 'Untranslated description of this field',
+        'type' => 'varchar',
+        'length' => 50,
+        'default' => '',
+      ),
+      'baz' => array(
+        'description' => 'Untranslated description of this field',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('baz'),
+  );
+  return $schema;
+}
+
+/**
+ * Make one field wider and add a new field in the mymodule_foo table.
+ *
+ * From "Setting up Database Tables" section in Chapter 2.
+ *
+ * Note: If you actually want to run this update, change the function name
+ * to remove the "not_", and then visit example.com/update.php.
+ */
+function not_mymodule_update_8001() {
+  db_change_field('mymodule_foo', 'bar', 'bar', array(
+    'description' => 'Untranslated description of this field',
+    'type' => 'varchar',
+    'length' => 150,
+    'default' => '',
+  ));
+  db_add_field('mymodule_foo', 'bay', array(
+    'description' => 'Untranslated description of this field',
+    'type' => 'varchar',
+    'length' => 50,
+    'default' => '',
+  ));
+}
