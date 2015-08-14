@@ -1,8 +1,0 @@
-# Local action from "Defining a Configuration Entity Type in Drupal 8",
-# chapter 4.
-
-entity.myentity_type.add_form:
-  route_name: entity.myentity_type.add_form
-  title: 'Add my entity subtype'
-  appears_on:
-    - mymodule.myentity_type.list
