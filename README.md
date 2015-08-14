@@ -1,10 +1,12 @@
 Programmer's Guide to Drupal
-===========================
+============================
 
-This is the example code that accompanies Programmer's Guide to Drupal by Jennifer Hodgdon (9781491911464). 
+This is the example code that accompanies [Programmer's Guide to Drupal, Second
+edition]http://shop.oreilly.com/product/0636920034612.do), by
+[Jennifer Hodgdon]https://github.com/jhodgdon-drp (ISBN: 978-1-4919-1146-4).
 
-Click the Download Zip button to the right to download example code.
+Click the Download Zip button on this page to download the code.
 
-Visit the catalog page [here](http://shop.oreilly.com/product/0636920034612.do).
-
-See an error? Report it [here](http://oreilly.com/catalog/errata.csp?isbn=0636920034612), or simply fork and send us a pull request.
+See an error?
+[Report it here](http://oreilly.com/catalog/errata.csp?isbn=0636920034612),
+or simply fork and send us a pull request.
