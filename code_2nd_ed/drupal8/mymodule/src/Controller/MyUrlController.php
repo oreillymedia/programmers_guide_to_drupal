@@ -7,7 +7,7 @@
 
 namespace Drupal\mymodule\Controller;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -55,8 +55,8 @@ class MyUrlController extends ControllerBase {
    */
   public function generateMyPage() {
     // Note: You should really use the Views module to do this! Code is
-    // only here to illustrate using the PagerDefault extension to a query,
-    // and 'pager' theme in a render array.
+    // only here to illustrate using PagerSelectExtender on a query,
+    // and 'pager' item in a render array.
 
     $query = $this->database->select('node', 'n');
     $query->innerJoin('node_field_data', 'nd', 'n.nid = nd.nid AND n.vid = nd.vid');
@@ -74,7 +74,7 @@ class MyUrlController extends ControllerBase {
     // Extract and sanitize the information from the query result.
     $titles = array();
     foreach ($result as $row) {
-      $titles[] = String::checkPlain($row->title);
+      $titles[] = SafeMarkup::checkPlain($row->title);
     }
 
     // Make the render array for a paged list of titles.
@@ -85,7 +85,7 @@ class MyUrlController extends ControllerBase {
     );
 
     // Add the pager.
-    $build['item_pager'] = array('#theme' => 'pager');
+    $build['item_pager'] = array('#type' => 'pager');
 
     return $build;
   }
@@ -103,7 +103,7 @@ class MyUrlController extends ControllerBase {
       // Sanitize $string and find appropriate matches -- about 10 or fewer.
       // Put them into $matches as items, each an array with
       // 'value' and 'label' elements.
-      $string = String::checkPlain($string);
+      $string = SafeMarkup::checkPlain($string);
 
       // As a proxy, just add some text to the end of the submitted text.
       $additions = array('add', 'choice', 'more', 'plus', 'something');

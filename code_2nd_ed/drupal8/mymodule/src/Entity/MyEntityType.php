@@ -23,7 +23,7 @@ use Drupal\mymodule\Entity\MyEntityTypeInterface;
  *     "form" = {
  *       "add" = "Drupal\mymodule\Entity\MyEntityTypeForm",
  *       "edit" = "Drupal\mymodule\Entity\MyEntityTypeForm",
- *       "delete" = "Drupal\mymodule\Entity\MyEntityTypeDeleteForm"
+ *       "delete" = "Drupal\mymodule\Entity\MyEntityTypeDeleteForm",
  *     },
  *     "list_builder" = "Drupal\mymodule\Entity\MyEntityTypeListBuilder",
  *   },
@@ -34,9 +34,9 @@ use Drupal\mymodule\Entity\MyEntityTypeInterface;
  *     "label" = "label",
  *   },
  *   links = {
- *     "add-form" = "entity.myentity_type.add_form",
- *     "edit-form" = "entity.myentity_type.edit_form",
- *     "delete-form" = "entity.myentity_type.delete_form"
+ *     "add-form" = "/admin/structure/myentity_type/add",
+ *     "edit-form" = "/admin/structure/myentity_type/manage/{myentity_type}",
+ *     "delete-form" = "/admin/structure/myentity_type/delete/{myentity_type}",
  *   }
  * )
  */

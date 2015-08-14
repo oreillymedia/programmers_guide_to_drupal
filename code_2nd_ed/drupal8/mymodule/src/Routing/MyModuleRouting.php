@@ -23,7 +23,7 @@ class MyModuleRouting extends RouteSubscriberBase {
    */
   protected function alterRoutes(RouteCollection $collection) {
     // Alter the title of the People administration page (admin/people).
-    $route = $collection->get('user.admin_account');
+    $route = $collection->get('entity.user.collection');
     $route->setDefault('_title', 'User accounts');
     // Make sure that the title text is translatable.
     $foo = t('User accounts');

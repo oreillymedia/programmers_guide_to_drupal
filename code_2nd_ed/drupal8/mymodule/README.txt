@@ -1,5 +1,5 @@
 This directory contains the Drupal module 8 code from the book "Programmers
-Guide to Drupal", by Jennifer Hodgdon, second edition, 2014.
+Guide to Drupal", by Jennifer Hodgdon, second edition, 2015.
 
 License: See book for details of license and copyright.
 
@@ -11,6 +11,8 @@ Contents:
   "Setting up Database Tables" section, chapter 2.
 
 - mymodule.js: Empty JavaScript file for inclusion in a form array.
+- mymodule.libraries.yml: Libraries file from "Render Arrays in Drupal 8",
+  chapter 4.
 
 - mymodule.routing.yml: Routing information for module from several sections.
 - mymodule.links.action.yml: Administrative action links for module, from
@@ -27,6 +29,8 @@ Contents:
 - config/install/mymodule.settings.yml: Config file from section
   "Config API in Drupal 8", chapter 2.
 - config/schema/mymodule.schema.yml: Config schema from several sections.
+- config/optional/views.view.myentity_content_list.yml: Views config file
+  used in tests.
 
 - src/Controller/MyUrlController.php: Route controller providing page output,
   from several sections.
@@ -37,8 +41,8 @@ Contents:
   Entity Type in Drupal 8", chapter 4.
 - src/Entity/MyEntityForm.php: Entity editing form from "Defining a Content
   Entity Type in Drupal 8", chapter 4.
-- src/Entity/MyEntityDeleteForm.php: Entity delete confirm form from "Defining a
-  Content Entity Type in Drupal 8", chapter 4.
+- src/Entity/MyEntityViewsData.php: Entity views data definition from "Defining
+  a Content Entity Type in Drupal 8", chapter 4.
 
 - src/Entity/MyEntityType.php: Entity class from "Defining a Configuration
   Entity Type in Drupal 8", chapter 4.
@@ -48,7 +52,7 @@ Contents:
   Configuration Entity Type in Drupal 8", chapter 4.
 - src/Entity/MyEntityTypeDeleteForm.php: Entity subtype delete confirm form
   from "Defining a Configuration Entity Type in Drupal 8", chapter 4.
-- src/Entity/MyEntityListBuilder.php: Entity subtype admin page builder from
+- src/Entity/MyEntityTypeListBuilder.php: Entity subtype admin page builder from
   "Defining a Configuration Entity Type in Drupal 8", chapter 4.
 
 - src/Form/ConfirmDeleteForm.php: Delete confirm form class from "Creating
@@ -61,8 +65,10 @@ Contents:
 
 - src/Plugin/Field/FieldWidget/MyCustomText.php: Field widget from
   "Defining a field widget in Drupal 8", chapter 4.
-- src/Plugin/Field/FieldFormatter/MyCustomText.php: Field widget from
+- src/Plugin/Field/FieldFormatter/MyCustomText.php: Field formatter from
   "Defining a field formatter in Drupal 8", chapter 4.
+- src/Plugin/views/wizard/MyEntityViewsWizard.php: Entity views wizard from
+  "Defining a Content Entity Type in Drupal 8", chapter 4.
 
 - src/Routing/MyModuleRouting.php: Event subscriber class from "Event
   Subscribers in Drupal 8: Altering Routes and Providing Dynamic Routes",

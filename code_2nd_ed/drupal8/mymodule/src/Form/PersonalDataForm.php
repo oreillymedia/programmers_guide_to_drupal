@@ -7,13 +7,13 @@
 
 namespace Drupal\mymodule\Form;
 
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\CssCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Component\Utility\String;
 
 /**
  * Presents a personal data form.
@@ -133,7 +133,7 @@ class PersonalDataForm extends FormBase {
     // Get another value, using a method where it could be nested.
     $parents = $form['company']['#array_parents'];
     $company = NestedArray::getValue($values, $parents);
-    $company = String::checkPlain($company);
+    $company = SafeMarkup::checkPlain($company);
 
     // Processing code would go here. As a proxy, display a message with the
     // values. Note that since the values are not sanitized, insert them

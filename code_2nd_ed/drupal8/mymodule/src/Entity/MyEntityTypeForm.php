@@ -67,8 +67,8 @@ class MyEntityTypeForm extends EntityForm {
   /**
    * Validates the values.
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
 
     $values = $form_state->getValues();
 

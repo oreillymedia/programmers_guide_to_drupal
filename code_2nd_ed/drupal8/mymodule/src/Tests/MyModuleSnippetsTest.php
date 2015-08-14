@@ -8,7 +8,7 @@
 namespace Drupal\mymodule\Tests;
 
 use Drupal;
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
@@ -69,7 +69,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '#input1' => t('Hello World!'),
       '#theme' => 'mymodule_hookname',
     );
-    $output = drupal_render($build);
+    $output = drupal_render_root($build);
     $expected = '<div>Hello World!</div>';
     $this->outputHTML($output, 'Theme template output');
     $this->assertEqual(trim($output), $expected, 'Theme template worked in render array');
@@ -81,7 +81,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
 
     $config = \Drupal::config('mymodule.settings');
     $this->assertTrue($config, 'Config class is not null');
-    $config = $container->get('config.factory')->get('mymodule.settings');
+    $config = $container->get('config.factory')->getEditable('mymodule.settings');
 
     $all = $config->get();
     $this->outputVariable($all, 'Full configuration output');
@@ -210,7 +210,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $plain_text = htmlentities($text);
     $url = 'http://example.com';
 
-    $output = String::checkPlain($text);
+    $output = SafeMarkup::checkPlain($text);
     $this->outputHTML($output, 'checkPlain() output');
     $this->assertEqual($output, $plain_text, 'checkPlain output is as expected');
 
@@ -281,17 +281,21 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Entity\EntityInterface',
       '\Drupal\Core\Entity\EntityManagerInterface',
       '\Drupal\Core\Entity\EntityStorageInterface',
+      '\Drupal\Core\Entity\EntityTypeInterface',
       '\Drupal\Core\Entity\Query\QueryInterface',
       '\Drupal\Core\Entity\Query\QueryAggregateInterface',
       '\Drupal\Core\Entity\EntityStorageInterface',
       '\Drupal\Core\Extension\ModuleHandlerInterface',
       '\Drupal\Core\Field\FieldItemInterface',
+      '\Drupal\Core\Field\FieldItemListInterface',
+      '\Drupal\Core\Field\FieldStorageDefinitionInterface',
       '\Drupal\Core\Field\FormatterInterface',
       '\Drupal\Core\Field\WidgetInterface',
       '\Drupal\Core\Form\FormStateInterface',
       '\Drupal\Core\Language\LanguageInterface',
       '\Drupal\Core\Render\Element\FormElementInterface',
       '\Drupal\Core\Render\Element\ElementInterface',
+      '\Drupal\Core\Routing\RouteMatchInterface',
       '\Drupal\Core\Session\AccountInterface',
       '\Drupal\Core\Session\AccountProxyInterface',
       '\Drupal\Core\State\StateInterface',
@@ -305,13 +309,14 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $classes = array(
       '\Drupal',
       '\Drupal\Component\Datetime\DateTimePlus',
-      '\Drupal\Component\Utility\String',
       '\Drupal\Component\Utility\Unicode',
+      '\Drupal\Core\Access\AccessResult',
       '\Drupal\Core\Ajax\AjaxResponse',
       '\Drupal\Core\Annotation\Translation',
       '\Drupal\Core\Block\Annotation\Block',
       '\Drupal\Core\Block\BlockBase',
       '\Drupal\Core\Block\BlockManager',
+      '\Drupal\Core\Cache\Cache',
       '\Drupal\Core\Config\Config',
       '\Drupal\Core\Entity\Annotation\ConfigEntityType',
       '\Drupal\Core\Entity\EntityForm',
@@ -320,7 +325,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Controller\ControllerBase',
       '\Drupal\Core\Database\Connection',
       '\Drupal\Core\Database\Query\PagerSelectExtender',
-      '\Drupal\core\Datetime\Entity\DateFormat',
+      '\Drupal\Core\Datetime\Entity\DateFormat',
       '\Drupal\Core\Entity\Annotation\ContentEntityType',
       '\Drupal\Core\Entity\ContentEntityBase',
       '\Drupal\Core\Entity\ContentEntityConfirmFormBase',
@@ -331,35 +336,45 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Field\Annotation\FieldType',
       '\Drupal\Core\Field\Annotation\FieldFormatter',
       '\Drupal\Core\Field\Annotation\FieldWidget',
+      '\Drupal\Core\Form\ConfigFormBase',
       '\Drupal\Core\Form\FormBase',
       '\Drupal\Core\Language\Language',
       '\Drupal\Core\Path\AliasManager',
       '\Drupal\Core\Plugin\DefaultPluginManager',
       '\Drupal\Core\Render\Annotation\FormElement',
       '\Drupal\Core\Render\Annotation\RenderElement',
+      '\Drupal\Core\Render\Element',
       '\Drupal\Core\Routing\RouteSubscriberBase',
+      '\Drupal\Core\Url',
+      '\Drupal\Component\Utility\SafeMarkup',
       '\Drupal\Tests\UnitTestCase',
       '\Drupal\block_content\Plugin\Block\BlockContentBlock',
       '\Drupal\migrate\MigrateExecutable',
       '\Drupal\node\Form\NodeTypeDeleteConfirm',
       '\Drupal\simpletest\WebTestBase',
+      '\Drupal\simpletest\KernelTestBase',
       '\Drupal\system\DateFormatListBuilder',
       '\Drupal\system\Form\DateFormatEditForm',
       '\Drupal\system\Form\DateFormatDeleteForm',
-      '\Drupal\user\Controller\UserAutocompleteController',
+      '\Drupal\block\Controller\CategoryAutocompleteController',
       '\Drupal\views\Plugin\views\field\FieldPluginBase',
+      '\Drupal\views\Annotation\ViewsArgument',
       '\Drupal\views\Annotation\ViewsField',
       '\Drupal\views\Annotation\ViewsRow',
       '\Drupal\views\Annotation\ViewsStyle',
+      '\Drupal\views\Plugin\views\field\FieldPluginBase',
       '\Drupal\views\Plugin\views\row\RowPluginBase',
       '\Drupal\views\Plugin\views\style\StylePluginBase',
       '\Drupal\views\ViewExecutable',
       '\Drupal\views\Views',
       '\Symfony\Component\DependencyInjection\Container',
+      '\Symfony\Component\EventDispatcher\Event',
       '\Symfony\Component\HttpFoundation\Request',
+      '\Symfony\Component\HttpFoundation\Response',
       '\Symfony\Component\Routing\Route',
       '\Symfony\Component\Routing\RouteCollection',
       '\Symfony\Component\Validator\Constraint',
+
     );
     foreach ($classes as $class) {
       $this->assertTrue(class_exists($class), "Class $class exists");
@@ -375,7 +390,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $methods = array(
       '\Drupal' => array('config', 'currentUser', 'formBuilder',
         'getContainer', 'service', 'l'),
-      '\Drupal\Component\Utility\String' => 'checkPlain',
+      '\Drupal\Component\Utility\SafeMarkup' => 'checkPlain',
       '\Drupal\Core\Ajax\AjaxResponse' => 'addCommand',
       '\Drupal\Core\Block\BlockBase' => array('access', 'build'),
       '\Drupal\Core\Block\BlockManager' => array('clearCachedDefinitions', 'getSortedDefinitions'),
@@ -390,14 +405,14 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
         'buildEntity',
         'form',
         'save',
-        'validate',
+        'validateForm',
       ),
       '\Drupal\Core\Entity\ContentEntityInterface' => 'baseFieldDefinitions',
       '\Drupal\Core\Entity\Entity' => 'access',
       '\Drupal\Core\Entity\EntityForm' => array(
         'form',
         'save',
-        'validate',
+        'validateForm',
       ),
       '\Drupal\Core\Entity\Query\QueryInterface' => 'condition',
       '\Drupal\Core\Field\FieldItemInterface' => array(
@@ -417,9 +432,12 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       ),
       '\Drupal\Core\Render\Element\ElementInterface' => 'getInfo',
       '\Drupal\Core\Session\AccountProxyInterface' => 'hasPermission',
-      '\Drupal\block\BlockListBuilder' => array( 'buildForm', 'createInstance'),
-      '\Drupal\user\Controller\UserAutocompleteController' => 'autocompleteUser',
+      '\Drupal\block\BlockListBuilder' => array('buildForm', 'createInstance'),
+      '\Drupal\block\BlockViewBuilder' => 'viewMultiple',
+      '\Drupal\block\Controller\CategoryAutocompleteController' => 'autocomplete',
       '\Symfony\Component\DependencyInjection\ContainerInterface' => 'get',
+      '\Symfony\Component\EventDispatcher\EventDispatcherInterface' => 'dispatch',
+      '\Symfony\Component\EventDispatcher\EventSubscriberInterface' => 'getSubscribedEvents',
 
     );
     foreach ($methods as $class => $methods) {
@@ -453,6 +471,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       'database',
       'entity.query',
       'entity.manager',
+      'event_dispatcher',
       'path.alias_manager',
       'plugin.manager.block',
       'string_translation',
@@ -469,17 +488,22 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       'core/lib/Drupal/Core/Ajax',
       'core/modules',
       'core/modules/block/block.services.yml',
+      'core/modules/block/block.routing.yml',
+      'core/modules/block/block.links.contextual.yml',
       'core/modules/filter/filter.permissions.yml',
       'core/modules/filter/src/FilterPermissions.php',
       'core/modules/system/system.routing.yml',
       'core/modules/system/config/schema/system.schema.yml',
+      'core/modules/taxonomy/taxonomy.routing.yml',
       'core/modules/user/user.routing.yml',
       'core/modules/user/user.links.action.yml',
       'core/modules/user/user.links.task.yml',
       'core/modules/views/src/Plugin/views',
+      'core/modules/views/src/Plugin/views/argument',
+      'core/modules/views/src/Plugin/views/field',
       'core/modules/views/src/Plugin/views/row',
       'core/modules/views/src/Plugin/views/style',
-      'core/vendor/symfony/dependency-injection/Symfony/Component/DependencyInjection/Container.php',
+      'core/vendor/symfony/dependency-injection/Container.php',
     );
 
     foreach ($files as $file) {

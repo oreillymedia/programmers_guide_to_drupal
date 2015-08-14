@@ -55,7 +55,8 @@ class MyEntityTypeListBuilder extends ConfigEntityListBuilder {
     $operations['add_new'] = array(
       'title' => $this->t('Add new My Entity'),
       'weight' =>  11,
-    ) + $url->toArray();
+      'url' => $url,
+    );
 
     return $operations;
   }
