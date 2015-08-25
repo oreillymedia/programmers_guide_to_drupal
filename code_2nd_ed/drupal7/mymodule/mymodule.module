@@ -968,10 +968,10 @@ function mymodule_default_panels_mini() {
   // --- End of export ---
 
   // After the export is pasted, you'll have $mini holding one exported
-  // mini-panel. Put it into the return array.
+  // mini panel. Put it into the return array.
   $minis['mymodule_test'] = $mini;
 
-  // Add additional mini-panels here.
+  // Add additional mini panels here.
 
   // Return them all.
   return $minis;
