@@ -8,7 +8,6 @@
 namespace Drupal\mymodule\Tests;
 
 use Drupal;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
@@ -210,10 +209,6 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $plain_text = htmlentities($text);
     $url = 'http://example.com';
 
-    $output = SafeMarkup::checkPlain($text);
-    $this->outputHTML($output, 'checkPlain() output');
-    $this->assertEqual($output, $plain_text, 'checkPlain output is as expected');
-
     $url_object = Url::fromUri($url);
     $output = Drupal::l($text, $url_object);
     $this->outputHTML($output, 'l() output');
@@ -390,7 +385,6 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $methods = array(
       '\Drupal' => array('config', 'currentUser', 'formBuilder',
         'getContainer', 'service', 'l'),
-      '\Drupal\Component\Utility\SafeMarkup' => 'checkPlain',
       '\Drupal\Core\Ajax\AjaxResponse' => 'addCommand',
       '\Drupal\Core\Block\BlockBase' => array('access', 'build'),
       '\Drupal\Core\Block\BlockManager' => array('clearCachedDefinitions', 'getSortedDefinitions'),

@@ -7,7 +7,6 @@
 
 namespace Drupal\mymodule\Controller;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -15,6 +14,7 @@ use Drupal\mymodule\Entity\MyEntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\Component\Utility\Html;
 
 /**
  * Provides route responses for the sample module.
@@ -71,10 +71,10 @@ class MyUrlController extends ControllerBase {
 
     $result = $query->execute();
 
-    // Extract and sanitize the information from the query result.
+    // Extract the information from the query result.
     $titles = array();
     foreach ($result as $row) {
-      $titles[] = SafeMarkup::checkPlain($row->title);
+      $titles[] = $row->title;
     }
 
     // Make the render array for a paged list of titles.
@@ -97,13 +97,15 @@ class MyUrlController extends ControllerBase {
    */
   public function autocomplete(Request $request) {
     $string = $request->query->get('q');
+    // This is being output as JSON, so it needs to be sanitized.
+    $string = Html::escape($string);
+
     $matches = array();
 
     if ($string) {
-      // Sanitize $string and find appropriate matches -- about 10 or fewer.
+      // Find appropriate matches -- about 10 or fewer.
       // Put them into $matches as items, each an array with
       // 'value' and 'label' elements.
-      $string = SafeMarkup::checkPlain($string);
 
       // As a proxy, just add some text to the end of the submitted text.
       $additions = array('add', 'choice', 'more', 'plus', 'something');
