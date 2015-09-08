@@ -16,7 +16,7 @@ use Drupal\Core\Block\BlockBase;
  *
  * @Block(
  *   id = "mymodule_first_block",
- *   admin_label = @Translation("First block from My Module")
+ *   admin_label = @Translation("First block from My Module"),
  * )
  */
 class MyModuleFirstBlock extends BlockBase {

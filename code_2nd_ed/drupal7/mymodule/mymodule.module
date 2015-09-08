@@ -31,22 +31,22 @@ function mymodule_theme($existing, $type, $theme, $path) {
   return array(
     // The array keys are names of the theme hooks you are defining.
     'mymodule_hookname' => array(
-       // Input variables.
-       'variables' => array(
-         // These are passed as an array to theme(), which passes them on
-         // to your theme function or template. Here, provide default values.
-         'input1' => '',
-       ),
-       // If you want to use a template, include this line; for a theme
-       // function, leave it out.
-       'template' => 'mymodule-hookname',
+      // Input variables.
+      'variables' => array(
+        // These are passed as an array to theme(), which passes them on
+        // to your theme function or template. Here, provide default values.
+        'input1' => '',
+      ),
+      // If you want to use a template, include this line; for a theme
+      // function, leave it out.
+      'template' => 'mymodule-hookname',
     ),
 
     // Define a second theme hook, using a theme function.
     'mymodule_hookname_2' => array(
-       'variables' => array(
-         'input1' => '',
-       ),
+      'variables' => array(
+        'input1' => '',
+      ),
     ),
   );
 }
@@ -63,7 +63,7 @@ function mymodule_theme($existing, $type, $theme, $path) {
  * @see mymodule-hookname.tpl.php
  */
 function theme_mymodule_hookname_2($variables) {
-   return '<div>' . $variables['input1'] . '</div>';
+  return '<div>' . $variables['input1'] . '</div>';
 }
 
 /**
@@ -93,10 +93,10 @@ function mymodule_permission() {
     // Entity access permissions, from "Defining an Entity Type in Drupal 7",
     // chapter 4.
     'view myentity' => array(
-       'title' => t('View my entity content'),
+      'title' => t('View my entity content'),
     ),
     'administer myentity' => array(
-       'title' => t('Administer my entities'),
+      'title' => t('Administer my entities'),
     ),
 
   );

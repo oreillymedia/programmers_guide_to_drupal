@@ -27,14 +27,14 @@ function mymodule_theme($existing, $type, $theme, $path) {
 
     // The array keys are names of the theme hooks you are defining.
     'mymodule_hookname' => array(
-       // Input variables.
-       'variables' => array(
-         // These are passed as an array to the rendering system, which
-         // passes them on to your theme template. Here, provide default values.
-         'input1' => '',
-       ),
-       // Name of the template file (without .html.twig extension).
-       'template' => 'mymodule-hookname',
+      // Input variables.
+      'variables' => array(
+        // These are passed as an array to the rendering system, which
+        // passes them on to your theme template. Here, provide default values.
+        'input1' => '',
+      ),
+      // Name of the template file (without .html.twig extension).
+      'template' => 'mymodule-hookname',
     ),
 
     // Theme hook for entity from "Defining a Content Entity Type in Drupal
