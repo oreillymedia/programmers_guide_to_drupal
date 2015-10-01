@@ -25,7 +25,10 @@ use Drupal\Core\Field\FieldItemListInterface;
  */
 class MyCustomText extends FormatterBase {
 
-  public function viewElements(FieldItemListInterface $items) {
+  /**
+   * {@inheritdoc}
+   */
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $output = array();
 
     foreach ($items as $delta => $item) {
@@ -47,4 +50,5 @@ class MyCustomText extends FormatterBase {
     }
     return $output;
   }
+
 }

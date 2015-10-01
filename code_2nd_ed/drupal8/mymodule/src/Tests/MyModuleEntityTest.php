@@ -19,7 +19,16 @@ class MyModuleEntityTest extends ProgrammersGuideTestBase {
    *
    * @var array
    */
-  public static $modules = array('mymodule', 'field', 'field_ui', 'text', 'filter', 'views', 'views_ui');
+  public static $modules = array('mymodule', 'field', 'field_ui', 'text', 'filter', 'views', 'views_ui', 'block');
+
+  protected function setUp() {
+    parent::setUp();
+
+    // Make sure local tasks, actions, and page title are showing.
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('page_title_block');
+  }
 
   /**
    * Tests the defined entity type, field formatter, field widget, and views.

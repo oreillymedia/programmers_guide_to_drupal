@@ -59,7 +59,7 @@ function mymodule_rules_action_info() {
  * @see mymodule_rules_action_info()
  */
 function mymodule_rules_action_user_list($item) {
-  // Since the parameter defined for this action is a node,
+  // Because the parameter defined for this action is a node,
   // $item is a node. Do a query here to find a list of
   // users related to this node.
 

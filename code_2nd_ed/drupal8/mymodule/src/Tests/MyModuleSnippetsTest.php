@@ -497,7 +497,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       'core/modules/views/src/Plugin/views/field',
       'core/modules/views/src/Plugin/views/row',
       'core/modules/views/src/Plugin/views/style',
-      'core/vendor/symfony/dependency-injection/Container.php',
+      'vendor/symfony/dependency-injection/Container.php',
     );
 
     foreach ($files as $file) {

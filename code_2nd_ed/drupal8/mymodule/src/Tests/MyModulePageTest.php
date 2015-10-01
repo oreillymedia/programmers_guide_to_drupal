@@ -39,6 +39,10 @@ class MyModulePageTest extends ProgrammersGuideTestBase {
           'created' => $start + $i,
         ));
     }
+
+    // Make sure local tasks and page title are showing.
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('page_title_block');
   }
 
   /**
