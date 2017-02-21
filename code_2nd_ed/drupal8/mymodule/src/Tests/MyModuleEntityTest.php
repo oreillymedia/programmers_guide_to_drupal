@@ -135,9 +135,10 @@ class MyModuleEntityTest extends ProgrammersGuideTestBase {
     // Click the add fields link and verify that the field is available,
     // as well as the default fields for this entity.
     $this->drupalGet('admin/structure/views/nojs/add-handler/foo_bar/default/field');
-    $this->assertText('My entity: The field label');
-    $this->assertText('My entity: My entity ID');
-    $this->assertText('My entity: Subtype');
+    $this->assertText('My entity');
+    $this->assertText('The field label');
+    $this->assertText('My entity ID');
+    $this->assertText('Subtype');
     $this->assertNoText('Error: missing help');
 
     // Visit the page of the default view that is included in this module.

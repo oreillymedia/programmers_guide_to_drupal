@@ -41,6 +41,7 @@ class MyThemeTest extends ProgrammersGuideTestBase {
     $this->drupalPlaceBlock('system_powered_by_block', array(
         'region' => 'internal_region_name',
         'label' => $block_title,
+        'label_display' => TRUE,
       ));
 
     // Place a block in one of the regular regions.
@@ -48,6 +49,7 @@ class MyThemeTest extends ProgrammersGuideTestBase {
     $this->drupalPlaceBlock('system_powered_by_block', array(
         'region' => 'content',
         'label' => $block_title_2,
+        'label_display' => TRUE,
       ));
 
     // Log in.

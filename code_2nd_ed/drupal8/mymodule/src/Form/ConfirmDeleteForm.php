@@ -70,7 +70,7 @@ class ConfirmDeleteForm extends ConfirmFormBase {
 
     // Perform the data deletion, if it were real. As a proxy, just put up
     // a message.
-    drupal_set_message(t('Would have deleted !id', array('!id' => $id)));
+    drupal_set_message(t('Would have deleted @id', array('@id' => $id)));
 
     // Redirect somewhere.
     $form_state->setRedirect('mymodule.personal_data_form');

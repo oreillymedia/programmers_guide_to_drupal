@@ -299,6 +299,10 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     );
     foreach ($interfaces as $interface) {
       $this->assertTrue(interface_exists($interface), "Interface $interface exists");
+      $file = $this->classToFile($interface);
+      if ($file) {
+        $this->assertNoDeprecated($file);
+      }
     }
 
     $classes = array(
@@ -373,6 +377,10 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     );
     foreach ($classes as $class) {
       $this->assertTrue(class_exists($class), "Class $class exists");
+      $file = $this->classToFile($class);
+      if ($file) {
+        $this->assertNoDeprecated($file);
+      }
     }
 
     $traits = array(
@@ -380,6 +388,10 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     );
     foreach ($traits as $trait) {
       $this->assertTrue(trait_exists($trait), "Trait $trait exists");
+      $file = $this->classToFile($trait);
+      if ($file) {
+        $this->assertNoDeprecated($file);
+      }
     }
 
     $methods = array(
@@ -440,6 +452,10 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       }
       foreach ($methods as $method) {
         $this->assertTrue(method_exists($class, $method), "Method $class::$method exists");
+      }
+      $file = $this->classToFile($class);
+      if ($file) {
+        $this->assertNoDeprecated($file);
       }
     }
 
@@ -503,5 +519,43 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     foreach ($files as $file) {
       $this->assertTrue(file_exists(DRUPAL_ROOT . '/' . $file), "File $file exists");
     }
+  }
+
+  /**
+   * Asserts that a file does not include the deprecated tag anywhere.
+   */
+  function assertNoDeprecated($file) {
+    $text = file_get_contents($file);
+    $this->assertFalse(strpos($text, '@deprecated'), $file . ' does not contain @deprected anywhere');
+  }
+
+  /**
+   * Converts a namespaced class name to a file name.
+   *
+   * @param string $class
+   *   Name of a class to find the filename of.
+   *
+   * @return string
+   *   File name of the class, or '' if it cannot be determined. This is
+   *   a heuristic, so it may not work for all files, and in particular,
+   *   it doesn't work for vendor files.
+   */
+  function classToFile($class) {
+    $parts = explode('\\', trim($class, '\\'));
+    if ($parts[0] != 'Drupal') {
+      return '';
+    }
+    if (count($parts) == 1) {
+      return DRUPAL_ROOT . '/core/lib/Drupal.php';
+    }
+    if ($parts[1] == 'Core' || $parts[1] == 'Component') {
+      return DRUPAL_ROOT . '/core/lib/' . implode('/', $parts) . '.php';
+    }
+    if ($parts[1] == 'Tests') {
+      return DRUPAL_ROOT . '/core/tests/' . implode('/', $parts) . '.php';
+    }
+    array_shift($parts);
+    $module = array_shift($parts);
+    return DRUPAL_ROOT . '/core/modules/' . $module . '/src/' . implode('/', $parts) . '.php';
   }
 }
