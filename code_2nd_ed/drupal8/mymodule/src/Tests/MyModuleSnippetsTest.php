@@ -24,7 +24,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
    *
    * @var array
    */
-  public static $modules = array('mymodule', 'block', 'node', 'filter');
+  public static $modules = array('mymodule', 'block', 'node', 'field', 'filter');
 
   function setUp() {
     parent::setUp();
@@ -68,6 +68,9 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '#input1' => t('Hello World!'),
       '#theme' => 'mymodule_hookname',
     );
+    // This call to drupal_render_root() is just for testing purposes (to
+    // verify that the theme snippet works). Calling this function directly is
+    // definitely not recommended!
     $output = drupal_render_root($build);
     $expected = '<div>Hello World!</div>';
     $this->outputHTML($output, 'Theme template output');
@@ -270,6 +273,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Block\BlockPluginInterface',
       '\Drupal\Core\Cache\CacheBackendInterface',
       '\Drupal\Core\Config\Entity\ConfigEntityInterface',
+      '\Drupal\Core\Config\ConfigFactoryInterface',
       '\Drupal\Core\Datetime\DateFormatInterface',
       '\Drupal\Core\DependencyInjection\ServiceModifierInterface',
       '\Drupal\Core\Entity\ContentEntityInterface',
@@ -283,7 +287,6 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Extension\ModuleHandlerInterface',
       '\Drupal\Core\Field\FieldItemInterface',
       '\Drupal\Core\Field\FieldItemListInterface',
-      '\Drupal\Core\Field\FieldStorageDefinitionInterface',
       '\Drupal\Core\Field\FormatterInterface',
       '\Drupal\Core\Field\WidgetInterface',
       '\Drupal\Core\Form\FormStateInterface',
@@ -308,6 +311,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $classes = array(
       '\Drupal',
       '\Drupal\Component\Datetime\DateTimePlus',
+      '\Drupal\Component\Utility\Html',
       '\Drupal\Component\Utility\Unicode',
       '\Drupal\Core\Access\AccessResult',
       '\Drupal\Core\Ajax\AjaxResponse',
@@ -317,12 +321,14 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Block\BlockManager',
       '\Drupal\Core\Cache\Cache',
       '\Drupal\Core\Config\Config',
+      '\Drupal\Core\DependencyInjection\ContainerBuilder',
       '\Drupal\Core\Entity\Annotation\ConfigEntityType',
       '\Drupal\Core\Entity\EntityForm',
       '\Drupal\Core\Config\Entity\ConfigEntityBase',
       '\Drupal\Core\Config\Entity\ConfigEntityListBuilder',
       '\Drupal\Core\Controller\ControllerBase',
       '\Drupal\Core\Database\Connection',
+      '\Drupal\Core\Database\Database',
       '\Drupal\Core\Database\Query\PagerSelectExtender',
       '\Drupal\Core\Datetime\Entity\DateFormat',
       '\Drupal\Core\Entity\Annotation\ContentEntityType',
@@ -338,20 +344,24 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Form\ConfigFormBase',
       '\Drupal\Core\Form\FormBase',
       '\Drupal\Core\Language\Language',
+      '\Drupal\Core\Link',
       '\Drupal\Core\Path\AliasManager',
       '\Drupal\Core\Plugin\DefaultPluginManager',
       '\Drupal\Core\Render\Annotation\FormElement',
       '\Drupal\Core\Render\Annotation\RenderElement',
       '\Drupal\Core\Render\Element',
       '\Drupal\Core\Routing\RouteSubscriberBase',
+      '\Drupal\Core\Site\Settings',
       '\Drupal\Core\Url',
-      '\Drupal\Component\Utility\SafeMarkup',
+      '\Drupal\KernelTests\KernelTestBase',
       '\Drupal\Tests\UnitTestCase',
       '\Drupal\block_content\Plugin\Block\BlockContentBlock',
+      '\Drupal\field\Entity\FieldStorageConfig',
+      '\Drupal\language\Entity\ConfigurableLanguage',
       '\Drupal\migrate\MigrateExecutable',
       '\Drupal\node\Form\NodeTypeDeleteConfirm',
+      '\Drupal\node\Entity\Node',
       '\Drupal\simpletest\WebTestBase',
-      '\Drupal\simpletest\KernelTestBase',
       '\Drupal\system\DateFormatListBuilder',
       '\Drupal\system\Form\DateFormatEditForm',
       '\Drupal\system\Form\DateFormatDeleteForm',
@@ -364,7 +374,6 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\views\Plugin\views\field\FieldPluginBase',
       '\Drupal\views\Plugin\views\row\RowPluginBase',
       '\Drupal\views\Plugin\views\style\StylePluginBase',
-      '\Drupal\views\ViewExecutable',
       '\Drupal\views\Views',
       '\Symfony\Component\DependencyInjection\Container',
       '\Symfony\Component\EventDispatcher\Event',
@@ -372,8 +381,6 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Symfony\Component\HttpFoundation\Response',
       '\Symfony\Component\Routing\Route',
       '\Symfony\Component\Routing\RouteCollection',
-      '\Symfony\Component\Validator\Constraint',
-
     );
     foreach ($classes as $class) {
       $this->assertTrue(class_exists($class), "Class $class exists");
@@ -396,7 +403,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
 
     $methods = array(
       '\Drupal' => array('config', 'currentUser', 'formBuilder',
-        'getContainer', 'service', 'l'),
+        'getContainer', 'service'),
       '\Drupal\Core\Ajax\AjaxResponse' => 'addCommand',
       '\Drupal\Core\Block\BlockBase' => array('access', 'build'),
       '\Drupal\Core\Block\BlockManager' => array('clearCachedDefinitions', 'getSortedDefinitions'),
@@ -436,6 +443,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
         'setErrorByName',
         'setRebuild',
       ),
+      '\Drupal\Core\Link' => 'fromTextAndUrl',
       '\Drupal\Core\Render\Element\ElementInterface' => 'getInfo',
       '\Drupal\Core\Session\AccountProxyInterface' => 'hasPermission',
       '\Drupal\block\BlockListBuilder' => array('buildForm', 'createInstance'),
@@ -460,15 +468,12 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     }
 
     $functions = array(
-      'check_markup',
-      'check_url',
       'db_add_field',
       'db_change_field',
       'db_create_table',
       'db_query',
       'db_select',
       'drupal_flush_all_caches',
-      'drupal_render',
       't',
     );
     foreach ($functions as $function) {
@@ -526,7 +531,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
    */
   function assertNoDeprecated($file) {
     $text = file_get_contents($file);
-    $this->assertFalse(strpos($text, '@deprecated'), $file . ' does not contain @deprected anywhere');
+    $this->assertFalse(strpos($text, '@deprecated'), $file . ' does not contain @deprecated anywhere');
   }
 
   /**
@@ -551,7 +556,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     if ($parts[1] == 'Core' || $parts[1] == 'Component') {
       return DRUPAL_ROOT . '/core/lib/' . implode('/', $parts) . '.php';
     }
-    if ($parts[1] == 'Tests') {
+    if ($parts[1] == 'Tests' || $parts[1] == 'KernelTests') {
       return DRUPAL_ROOT . '/core/tests/' . implode('/', $parts) . '.php';
     }
     array_shift($parts);
