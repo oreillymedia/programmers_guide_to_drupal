@@ -49,14 +49,14 @@ class MyEntityTypeForm extends EntityForm {
 
     $form['settings'] = array(
       '#type' => 'details',
-      '#title' => t('Settings'),
+      '#title' => $this->t('Settings'),
       '#open' => TRUE,
       '#tree' => TRUE,
     );
 
     $settings = $this->entity->settings;
     $form['settings']['default_status'] = array(
-      '#title' => t('Published by default'),
+      '#title' => $this->t('Published by default'),
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['default_status']),
     );

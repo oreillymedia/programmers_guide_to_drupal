@@ -37,12 +37,12 @@ class MyCustomText extends FormatterBase {
 
         case 'x_stored':
           // Output the corresponding text or icon.
-          $output[$delta] = array('#markup' => '<p>' . t('Predefined output text x') . '</p>');
+          $output[$delta] = array('#markup' => '<p>' . $this->t('Predefined output text x') . '</p>');
           break;
 
         case 'y_stored':
           // Output the corresponding text or icon.
-          $output[$delta] = array('#markup' => '<p>' . t('Predefined output text y') . '</p>');
+          $output[$delta] = array('#markup' => '<p>' . $this->t('Predefined output text y') . '</p>');
           break;
 
         // Handle other options here.

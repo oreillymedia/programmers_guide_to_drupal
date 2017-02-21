@@ -79,7 +79,7 @@ class PersonalDataForm extends FormBase {
     // Auto-complete field.
     $form['my_autocomplete_field'] = array(
       '#type' => 'textfield',
-      '#title' => t('Autocomplete field'),
+      '#title' => $this->t('Autocomplete field'),
       '#autocomplete_route_name' => 'mymodule.autocomplete',
     );
 
@@ -92,7 +92,7 @@ class PersonalDataForm extends FormBase {
 
     $form['text_trigger'] = array(
       '#type' => 'textfield',
-      '#title' => t('Type here to trigger Ajax'),
+      '#title' => $this->t('Type here to trigger Ajax'),
       '#ajax' => array(
         'event' => 'keyup',
         'wrapper' => 'ajax-output-spot',
@@ -107,7 +107,7 @@ class PersonalDataForm extends FormBase {
 
     $form['button_trigger'] = array(
       '#type' => 'button',
-      '#value' => t('Click here to trigger Ajax'),
+      '#value' => $this->t('Click here to trigger Ajax'),
       '#ajax' => array(
         'callback' => 'Drupal\mymodule\Form\PersonalDataForm::ajaxButtonCallback',
       ),
@@ -157,6 +157,7 @@ class PersonalDataForm extends FormBase {
     // Read the text from the text field.
     $text = $form_state->getValues()['text_trigger'];
     if (!$text) {
+      // This is a static function, so it cannot call $this->t().
       $text = t('nothing');
     }
 

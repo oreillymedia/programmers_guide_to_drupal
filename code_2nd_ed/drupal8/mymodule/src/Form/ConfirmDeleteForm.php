@@ -51,7 +51,7 @@ class ConfirmDeleteForm extends ConfirmFormBase {
    * Defines the question for confirmation.
    */
   public function getQuestion() {
-    return  t('Are you sure you want to delete content item %id?',
+    return  $this->t('Are you sure you want to delete content item %id?',
       array('%id' => $this->to_delete_id));
   }
 
@@ -70,7 +70,7 @@ class ConfirmDeleteForm extends ConfirmFormBase {
 
     // Perform the data deletion, if it were real. As a proxy, just put up
     // a message.
-    drupal_set_message(t('Would have deleted @id', array('@id' => $id)));
+    drupal_set_message($this->t('Would have deleted @id', array('@id' => $id)));
 
     // Redirect somewhere.
     $form_state->setRedirect('mymodule.personal_data_form');

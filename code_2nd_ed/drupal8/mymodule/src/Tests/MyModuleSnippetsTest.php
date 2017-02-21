@@ -10,6 +10,7 @@ namespace Drupal\mymodule\Tests;
 use Drupal;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
 /**
@@ -136,6 +137,9 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     // chapter 2. Good code only; bad code examples are omitted.
     $button_text = t('Save');
     $this->assertEqual($button_text, 'Save', 't() worked OK on simple string');
+    // Use the TranslatableMarkup class.
+    $button_text = new TranslatableMarkup('Save');
+    $this->assertEqual((string) $button_text, 'Save', 'TranslatableMarkup class worked OK on simple string');
 
     $user_name = 'foo';
     $message_string = t('Hello @user_name', array('@user_name' => $user_name));
@@ -352,6 +356,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Render\Element',
       '\Drupal\Core\Routing\RouteSubscriberBase',
       '\Drupal\Core\Site\Settings',
+      '\Drupal\Core\StringTranslation\TranslatableMarkup',
       '\Drupal\Core\Url',
       '\Drupal\KernelTests\KernelTestBase',
       '\Drupal\Tests\UnitTestCase',
