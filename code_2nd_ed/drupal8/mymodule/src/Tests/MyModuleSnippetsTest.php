@@ -338,6 +338,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Database\Query\PagerSelectExtender',
       '\Drupal\Core\Database\Schema',
       '\Drupal\Core\Datetime\Entity\DateFormat',
+      '\Drupal\Core\DrupalKernel',
       '\Drupal\Core\Entity\Annotation\ContentEntityType',
       '\Drupal\Core\Entity\ContentEntityBase',
       '\Drupal\Core\Entity\ContentEntityConfirmFormBase',
@@ -387,6 +388,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Symfony\Component\EventDispatcher\Event',
       '\Symfony\Component\HttpFoundation\Request',
       '\Symfony\Component\HttpFoundation\Response',
+      '\Symfony\Component\HttpKernel\HttpKernel',
       '\Symfony\Component\Routing\Route',
       '\Symfony\Component\Routing\RouteCollection',
     );
@@ -422,7 +424,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Database\Database' => 'getConnection',
       '\Drupal\Core\Database\Connection' => array('select', 'query'),
       '\Drupal\Core\DependencyInjection\ServiceModifierInterface' => 'alter',
-      '\Drupal\Core\DrupalKernel' => 'discoverServiceProviders',
+      '\Drupal\Core\DrupalKernel' => array('discoverServiceProviders', 'handle', 'preHandle'),
       '\Drupal\Core\Entity\ContentEntityForm' => array(
         'buildEntity',
         'form',
@@ -461,6 +463,8 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Symfony\Component\DependencyInjection\ContainerInterface' => 'get',
       '\Symfony\Component\EventDispatcher\EventDispatcherInterface' => 'dispatch',
       '\Symfony\Component\EventDispatcher\EventSubscriberInterface' => 'getSubscribedEvents',
+      '\Symfony\Component\HttpFoundation\Response' => 'send',
+      '\Symfony\Component\HttpKernel\HttpKernel' => 'handle',
 
     );
     foreach ($methods as $class => $methods) {
@@ -503,6 +507,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       'core/config/schema/core.data_types.schema.yml',
       'core/core.services.yml',
       'core/includes/database.inc',
+      'core/includes/bootstrap.inc',
       'core/lib/Drupal/Component/Datetime/DateTimePlus.php',
       'core/lib/Drupal/Core/Ajax',
       'core/modules',
