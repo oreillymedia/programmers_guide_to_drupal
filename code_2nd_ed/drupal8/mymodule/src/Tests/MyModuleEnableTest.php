@@ -7,6 +7,8 @@
 
 namespace Drupal\mymodule\Tests;
 
+use Drupal\Core\Database\Database;
+
 /**
  * Tests module enable hooks and other basic functionality.
  *
@@ -27,12 +29,14 @@ class MyModuleEnableTest extends ProgrammersGuideTestBase {
    * @see mymodule_schema()
    */
   function testSchemaHook() {
+    $connection = Database::getConnection();
+
     // Add some data to the table, and then retrieve it, to verify that
     // the table was created.
-    db_insert('mymodule_foo')
+    $connection->insert('mymodule_foo')
       ->fields(array('bar' => 'Hello', 'baz' => 2))
       ->execute();
-    $result = db_query('SELECT * from {mymodule_foo}');
+    $result = $connection->query('SELECT * from {mymodule_foo}');
     $count = 0;
     foreach ($result as $record) {
       $count++;

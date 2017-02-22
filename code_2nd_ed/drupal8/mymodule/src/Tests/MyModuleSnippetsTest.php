@@ -10,6 +10,7 @@ namespace Drupal\mymodule\Tests;
 use Drupal;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Database\Database;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
@@ -160,7 +161,8 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     // Query by status 0 (blocked).
     $desired_status = 0;
     $found = FALSE;
-    $result = db_query('SELECT * FROM {users_field_data} u WHERE u.status = :status',
+    $connection = Database::getConnection();
+    $result = $connection->query('SELECT * FROM {users_field_data} u WHERE u.status = :status',
       array(':status' => $desired_status));
     foreach ($result as $record) {
       $this->outputVariable($record, 'User database record');
@@ -172,7 +174,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
 
     // Test the ability to query by user name.
     $found = FALSE;
-    $result = db_query('SELECT * FROM {users_field_data} u WHERE u.name = :name',
+    $result = $connection->query('SELECT * FROM {users_field_data} u WHERE u.name = :name',
       array(':name' => $account->getUsername()));
     foreach ($result as $record) {
       if ($record->uid == $account->id()) {
@@ -187,7 +189,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $account = $this->drupalCreateUser(array('access content'));
     $this->drupalLogin($account);
 
-    $query = db_select('node', 'n');
+    $query = $connection->select('node', 'n');
     $query->innerJoin('node_field_data', 'nd', 'n.nid = nd.nid AND n.vid = nd.vid');
     $query->innerJoin('users_field_data', 'u', 'u.uid = nd.uid');
     $query->addField('nd', 'changed', 'last_updated');
@@ -334,6 +336,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\Database\Connection',
       '\Drupal\Core\Database\Database',
       '\Drupal\Core\Database\Query\PagerSelectExtender',
+      '\Drupal\Core\Database\Schema',
       '\Drupal\Core\Datetime\Entity\DateFormat',
       '\Drupal\Core\Entity\Annotation\ContentEntityType',
       '\Drupal\Core\Entity\ContentEntityBase',
@@ -416,7 +419,8 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
         'invalidate',
         'set'),
       '\Drupal\Core\Config\Config' => array('get', 'save', 'set'),
-      '\Drupal\Core\Database\Connection' => 'select',
+      '\Drupal\Core\Database\Database' => 'getConnection',
+      '\Drupal\Core\Database\Connection' => array('select', 'query'),
       '\Drupal\Core\DependencyInjection\ServiceModifierInterface' => 'alter',
       '\Drupal\Core\DrupalKernel' => 'discoverServiceProviders',
       '\Drupal\Core\Entity\ContentEntityForm' => array(
@@ -473,11 +477,6 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     }
 
     $functions = array(
-      'db_add_field',
-      'db_change_field',
-      'db_create_table',
-      'db_query',
-      'db_select',
       'drupal_flush_all_caches',
       't',
     );
