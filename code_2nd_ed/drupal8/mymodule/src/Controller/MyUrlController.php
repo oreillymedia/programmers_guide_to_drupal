@@ -134,7 +134,7 @@ class MyUrlController extends ControllerBase {
    */
   public function addEntityPage(MyEntityTypeInterface $myentity_type) {
     // Create a stub entity of this type.
-    $entity = $this->entityManager()
+    $entity = $this->entityTypeManager()
       ->getStorage('myentity')
       ->create(array('subtype' => $myentity_type->id()));
 

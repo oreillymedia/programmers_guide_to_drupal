@@ -254,11 +254,11 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
     $ids = $query->execute();
 
     // Try different methods of getting storage manager.
-    $storage = \Drupal::entityManager()->getStorage('node');
+    $storage = \Drupal::entityTypeManager()->getStorage('node');
     $this->assertTrue($storage, 'Storage is not null');
 
     // Load the entities and verify.
-    $storage = $container->get('entity.manager')->getStorage('node');
+    $storage = $container->get('entity_type.manager')->getStorage('node');
     $entities = $storage->loadMultiple($ids);
     $this->assertEqual(count($entities), 1, 'One node was found');
     $first = reset($entities);
@@ -284,7 +284,7 @@ class MyModuleSnippetsTest extends ProgrammersGuideTestBase {
       '\Drupal\Core\DependencyInjection\ServiceModifierInterface',
       '\Drupal\Core\Entity\ContentEntityInterface',
       '\Drupal\Core\Entity\EntityInterface',
-      '\Drupal\Core\Entity\EntityManagerInterface',
+      '\Drupal\Core\Entity\EntityTypeManagerInterface',
       '\Drupal\Core\Entity\EntityStorageInterface',
       '\Drupal\Core\Entity\EntityTypeInterface',
       '\Drupal\Core\Entity\Query\QueryInterface',

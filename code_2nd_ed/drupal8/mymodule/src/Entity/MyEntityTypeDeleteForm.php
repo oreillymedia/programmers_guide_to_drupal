@@ -7,7 +7,7 @@
 namespace Drupal\mymodule\Entity;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -23,7 +23,7 @@ class MyEntityTypeDeleteForm extends EntityConfirmFormBase {
   /**
    * The entity manager class.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $manager;
 
@@ -37,7 +37,7 @@ class MyEntityTypeDeleteForm extends EntityConfirmFormBase {
   /**
    * Constructs the delete confirm form, using dependency injection.
    */
-  public function __construct(QueryFactory $query_factory, EntityManagerInterface $manager) {
+  public function __construct(QueryFactory $query_factory, EntityTypeManagerInterface $manager) {
     $this->queryFactory = $query_factory;
     $this->manager = $manager;
   }
@@ -48,7 +48,7 @@ class MyEntityTypeDeleteForm extends EntityConfirmFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity.query'),
-      $container->get('entity.manager')
+      $container->get('entity_type.manager')
     );
   }
 
