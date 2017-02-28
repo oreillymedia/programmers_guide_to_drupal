@@ -42,31 +42,6 @@ mymodule.autocomplete:
   requirements:
     _permission: 'use company field'
 
-# Routes from "Defining a Content Entity Type in Drupal 8", chapter 4.
-
-entity.myentity.canonical:
-  path: '/myentity/{myentity}'
-  defaults:
-    _entity_view: 'myentity.full'
-  requirements:
-    _entity_access: 'myentity.view'
-
-entity.myentity.delete_form:
-  path: '/myentity/{myentity}/delete'
-  defaults:
-    _entity_form: 'myentity.delete'
-    _title: 'Delete'
-  requirements:
-    _entity_access: 'myentity.delete'
-
-entity.myentity.edit_form:
-  path: '/myentity/{myentity}/edit'
-  defaults:
-    _entity_form: 'myentity.edit'
-    _title: 'Edit my entity'
-  requirements:
-    _entity_access: 'myentity.edit'
-
 # Routes from "Defining a Configuration Entity Type in Drupal 8", chapter 4.
 
 mymodule.myentity_type.list:

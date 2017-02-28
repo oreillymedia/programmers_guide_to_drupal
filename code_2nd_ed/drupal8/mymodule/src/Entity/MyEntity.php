@@ -25,6 +25,10 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
  *     "views_data" = "Drupal\mymodule\Entity\MyEntityViewsData",
+ *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *     },
  *     "form" = {
  *       "default" = "Drupal\mymodule\Entity\MyEntityForm",
  *       "edit" = "Drupal\mymodule\Entity\MyEntityForm",

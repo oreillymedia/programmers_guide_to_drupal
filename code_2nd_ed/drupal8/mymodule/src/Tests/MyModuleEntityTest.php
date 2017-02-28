@@ -113,7 +113,7 @@ class MyModuleEntityTest extends ProgrammersGuideTestBase {
 
     // Edit the entity.
     $this->clickLink(t('Edit'));
-    $this->assertTitleContains('Edit my entity', 'Title is correct');
+    $this->assertTitleContains('Edit My title goes here', 'Title is correct');
     $this->assertLink(t('Delete'), 0, 'Delete link is present');
     $this->drupalPostForm(NULL, array(
         'title[0][value]' => 'My new title',
